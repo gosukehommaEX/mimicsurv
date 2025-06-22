@@ -28,5 +28,5 @@ Suggests:
     ggplot2,
     PWEALL
 VignetteBuilder: knitr
-URL: https://github.com/gosukehommaEX/mimicsurv
+URL: https://github.com/gosukehommaEX/mimicsurv, https://gosukehommaEX.github.io/mimicsurv/
 BugReports: https://github.com/gosukehommaEX/mimicsurv/issues
