@@ -1,17 +1,29 @@
 # mimicsurv
 
-An R package for survival analysis from Kaplan-Meier tables using the person-years method.
+> Extract Survival Analysis Results from Kaplan-Meier Tables Using Person-Years Method
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/gosukehommaEX/mimicsurv/workflows/R-CMD-check/badge.svg)](https://github.com/gosukehommaEX/mimicsurv/actions)
+<!-- badges: end -->
 
 ## Overview
 
-The `mimicsurv` package provides functions to estimate hazard rates and median survival time from published Kaplan-Meier table data using the person-years method, assuming exponential distribution within each interval. It also includes simulation functions for validation of the estimation methods.
+The `mimicsurv` package provides tools for survival analysis from published Kaplan-Meier tables using the person-years method. This package enables researchers to extract quantitative survival analysis results from published studies when individual patient data is not available.
+
+It also includes simulation functions for validation of the estimation methods.
 
 ## Documentation
 
 ### Quick Start Guide
+
 📖 **[Getting Started with mimicsurv](https://gosukehommaEX.github.io/mimicsurv/articles/getting-started.html)** - Complete tutorial with examples
 
+### Real-World Case Studies
+
+🏥 **[KEYNOTE-859 Clinical Trial Analysis](https://gosukehommaEX.github.io/mimicsurv/articles/keynote859-analysis.html)** - Reproducing survival results from a real pembrolizumab clinical trial
+
 ### Reference Documentation
+
 📚 **[Package Reference](https://gosukehommaEX.github.io/mimicsurv/reference/index.html)** - Detailed function documentation
 
 ## Installation
@@ -29,77 +41,76 @@ devtools::install_github("gosukehommaEX/mimicsurv")
 ## Dependencies
 
 This package requires the following R packages:
-- `stats` (base R)
-- `utils` (base R)
-- `PWEALL` (for simulation validation)
+- `survival` (automatically installed)
+- For vignettes: `ggplot2`, `dplyr` (suggested packages)
 
-## Main Functions
+## Features
 
-### Core Analysis Functions
+- **Extract survival metrics** from published Kaplan-Meier curves
+- **Estimate hazard rates** using the person-years method  
+- **Calculate median survival times** when not explicitly reported
+- **Validate methodology** with simulation functions
+- **Real-world examples** including KEYNOTE-859 clinical trial analysis
+- **Enable meta-analyses** and comparative effectiveness research
 
-- `extractfromKM()`: Extract survival analysis results from Kaplan-Meier table using person-years method
-- `getMediansurv()`: Calculate median survival time from piecewise exponential parameters
-
-### Simulation Functions
-
-- `simPE()`: Simulate survival data from piecewise exponential distribution
-- `summaryKM()`: Create Kaplan-Meier style summary table from simulated data
-- `validate_mimicsurv()`: Comprehensive simulation study for hazard estimation validation
-
-## Example Usage
+## Quick Example
 
 ```r
 library(mimicsurv)
 
-# Example: Basic survival analysis from KM table
+# Example data from a clinical trial
 time_points <- c(0, 6, 12, 18, 24)
 n_risk <- c(200, 150, 100, 60, 35)
 n_censored <- c(0, 10, 20, 30, 40)
 
+# Extract survival analysis results
 result <- extractfromKM(time_points, n_risk, n_censored)
+
+# View results
 print(result$hazard_table)
-print(paste("Median survival:", result$median_survival, "months"))
-
-# Example: Simulation validation with reproducible results
-true_times <- c(0, 6, 12, 18, 24)
-true_hazards <- c(0.05, 0.08, 0.12, 0.15)
-
-# Simulate data with seed for reproducibility
-sim_data <- simPE(
-  n = 1000,
-  time_points = true_times,
-  hazard_rates = true_hazards,
-  max_time = 24,
-  censoring_prob = 0.15,
-  seed = 123  # Ensures reproducible results
-)
-
-# Create KM table and validate
-km_table <- summaryKM(sim_data, true_times)
-validation_result <- extractfromKM(true_times, km_table$n_risk, km_table$n_censored_cumulative)
-
-# Compare true vs estimated hazards
-hazard_comparison <- data.frame(
-  True_Hazard = true_hazards,
-  Estimated_Hazard = validation_result$hazard_table$hazard_rate,
-  Relative_Error = abs(validation_result$hazard_table$hazard_rate - true_hazards) / true_hazards * 100
-)
-print(hazard_comparison)
+cat("Median survival time:", result$median_survival, "months")
 ```
 
-## Mathematical Background
+## Methodology
 
-The package implements survival analysis methods based on:
+The package implements the person-years method for hazard estimation based on the following assumptions:
 
-- **Person-years method**: Calculates hazard rates as events per person-time using trapezoidal rule
-- **Piecewise exponential model**: Assumes constant hazard within intervals
-- **Median survival estimation**: Uses exponential survival function: S(t) = exp(-∑λⱼΔtⱼ)
+- **Piecewise exponential survival** within each time interval
+- **Non-informative censoring** independent of the event process  
+- **Uniform distribution** of events and censoring within intervals
 
-## Author
+For detailed mathematical background, see the [Getting Started vignette](https://gosukehommaEX.github.io/mimicsurv/articles/getting-started.html).
 
-**Gosuke Homma**  
-GitHub: [gosukehommaEX](https://github.com/gosukehommaEX)
+## Use Cases
+
+- **Systematic reviews** and meta-analyses
+- **Comparative effectiveness research**
+- **Health technology assessment**
+- **Clinical trial re-analysis** and validation
+- **Academic research** when individual patient data (IPD) is unavailable
+
+## Real-World Applications
+
+The package includes a comprehensive case study analyzing the KEYNOTE-859 clinical trial, demonstrating how to:
+
+- Extract survival data from published Kaplan-Meier curves
+- Compare treatment arms (pembrolizumab vs. placebo)
+- Estimate hazard rates over time
+- Calculate median survival times
+- Visualize results with publication-ready figures
+
+See the [KEYNOTE-859 Analysis vignette](https://gosukehommaEX.github.io/mimicsurv/articles/keynote859-analysis.html) for the complete workflow.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT + file LICENSE
+
+## Citation
+
+If you use this package in your research, please cite:
+
+```
+Homma, G. (2025). mimicsurv: Extract Survival Analysis Results from 
+Kaplan-Meier Tables Using Person-Years Method. R package version 0.1.0. 
+https://github.com/gosukehommaEX/mimicsurv
+```

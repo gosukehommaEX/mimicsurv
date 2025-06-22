@@ -9,24 +9,23 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: This package provides functions to estimate hazard rates and median 
-    survival time from published Kaplan-Meier table data using the person-years 
-    method, assuming exponential distribution within each interval. It also 
-    includes simulation functions for validation of the estimation methods.
+Description: Provides tools for survival analysis from published Kaplan-Meier 
+    tables using the person-years method. Estimates hazard rates and median 
+    survival time from digitized Kaplan-Meier curve data, assuming exponential 
+    distribution within each interval. It also includes simulation functions 
+    for validation of the estimation methods. The package includes real-world 
+    examples including analysis of KEYNOTE-859 clinical trial data.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.3.2
-Depends: 
-    R (>= 3.5.0)
-Imports: 
-    stats
 Suggests: 
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
     ggplot2,
+    dplyr,
     PWEALL
 VignetteBuilder: knitr
-URL: https://github.com/gosukehommaEX/mimicsurv, https://gosukehommaEX.github.io/mimicsurv/
+Config/testthat/edition: 3
+URL: https://gosukehommaEX.github.io/mimicsurv/
 BugReports: https://github.com/gosukehommaEX/mimicsurv/issues

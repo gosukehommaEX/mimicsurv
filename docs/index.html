@@ -38,6 +38,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/getting-started.html">Getting Started</a></li>
+    <li><a class="dropdown-item" href="articles/keynote859-analysis.html">KEYNOTE-859 Analysis</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">News</a></li>
@@ -54,11 +55,16 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="mimicsurv">mimicsurv<a class="anchor" aria-label="anchor" href="#mimicsurv"></a>
 </h1></div>
-<p>An R package for survival analysis from Kaplan-Meier tables using the person-years method.</p>
+<blockquote>
+<p>Extract Survival Analysis Results from Kaplan-Meier Tables Using Person-Years Method</p>
+</blockquote>
+<!-- badges: start -->
+
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>The <code>mimicsurv</code> package provides functions to estimate hazard rates and median survival time from published Kaplan-Meier table data using the person-years method, assuming exponential distribution within each interval. It also includes simulation functions for validation of the estimation methods.</p>
+<p>The <code>mimicsurv</code> package provides tools for survival analysis from published Kaplan-Meier tables using the person-years method. This package enables researchers to extract quantitative survival analysis results from published studies when individual patient data is not available.</p>
+<p>It also includes simulation functions for validation of the estimation methods.</p>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
@@ -67,6 +73,11 @@
 <h3 id="quick-start-guide">Quick Start Guide<a class="anchor" aria-label="anchor" href="#quick-start-guide"></a>
 </h3>
 <p>📖 <strong><a href="https://gosukehommaEX.github.io/mimicsurv/articles/getting-started.html">Getting Started with mimicsurv</a></strong> - Complete tutorial with examples</p>
+</div>
+<div class="section level3">
+<h3 id="real-world-case-studies">Real-World Case Studies<a class="anchor" aria-label="anchor" href="#real-world-case-studies"></a>
+</h3>
+<p>🏥 <strong><a href="https://gosukehommaEX.github.io/mimicsurv/articles/keynote859-analysis.html">KEYNOTE-859 Clinical Trial Analysis</a></strong> - Reproducing survival results from a real pembrolizumab clinical trial</p>
 </div>
 <div class="section level3">
 <h3 id="reference-documentation">Reference Documentation<a class="anchor" aria-label="anchor" href="#reference-documentation"></a>
@@ -88,98 +99,99 @@
 <div class="section level2">
 <h2 id="dependencies">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies"></a>
 </h2>
-<p>This package requires the following R packages: - <code>stats</code> (base R) - <code>utils</code> (base R) - <code>PWEALL</code> (for simulation validation)</p>
+<p>This package requires the following R packages: - <code>survival</code> (automatically installed) - For vignettes: <code>ggplot2</code>, <code>dplyr</code> (suggested packages)</p>
 </div>
 <div class="section level2">
-<h2 id="main-functions">Main Functions<a class="anchor" aria-label="anchor" href="#main-functions"></a>
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
-<div class="section level3">
-<h3 id="core-analysis-functions">Core Analysis Functions<a class="anchor" aria-label="anchor" href="#core-analysis-functions"></a>
-</h3>
 <ul>
 <li>
-<code><a href="reference/extractfromKM.html">extractfromKM()</a></code>: Extract survival analysis results from Kaplan-Meier table using person-years method</li>
+<strong>Extract survival metrics</strong> from published Kaplan-Meier curves</li>
 <li>
-<code><a href="reference/getMediansurv.html">getMediansurv()</a></code>: Calculate median survival time from piecewise exponential parameters</li>
+<strong>Estimate hazard rates</strong> using the person-years method<br>
+</li>
+<li>
+<strong>Calculate median survival times</strong> when not explicitly reported</li>
+<li>
+<strong>Validate methodology</strong> with simulation functions</li>
+<li>
+<strong>Real-world examples</strong> including KEYNOTE-859 clinical trial analysis</li>
+<li>
+<strong>Enable meta-analyses</strong> and comparative effectiveness research</li>
 </ul>
-</div>
-<div class="section level3">
-<h3 id="simulation-functions">Simulation Functions<a class="anchor" aria-label="anchor" href="#simulation-functions"></a>
-</h3>
-<ul>
-<li>
-<code><a href="reference/simPE.html">simPE()</a></code>: Simulate survival data from piecewise exponential distribution</li>
-<li>
-<code><a href="reference/summaryKM.html">summaryKM()</a></code>: Create Kaplan-Meier style summary table from simulated data</li>
-<li>
-<code><a href="reference/validate_mimicsurv.html">validate_mimicsurv()</a></code>: Comprehensive simulation study for hazard estimation validation</li>
-</ul>
-</div>
 </div>
 <div class="section level2">
-<h2 id="example-usage">Example Usage<a class="anchor" aria-label="anchor" href="#example-usage"></a>
+<h2 id="quick-example">Quick Example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/gosukehommaEX/mimicsurv" class="external-link">mimicsurv</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Example: Basic survival analysis from KM table</span></span>
+<span><span class="co"># Example data from a clinical trial</span></span>
 <span><span class="va">time_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span><span class="op">)</span></span>
 <span><span class="va">n_risk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">150</span>, <span class="fl">100</span>, <span class="fl">60</span>, <span class="fl">35</span><span class="op">)</span></span>
 <span><span class="va">n_censored</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">30</span>, <span class="fl">40</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Extract survival analysis results</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">n_risk</span>, <span class="va">n_censored</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Median survival:"</span>, <span class="va">result</span><span class="op">$</span><span class="va">median_survival</span>, <span class="st">"months"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Example: Simulation validation with reproducible results</span></span>
-<span><span class="va">true_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span><span class="op">)</span></span>
-<span><span class="va">true_hazards</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Simulate data with seed for reproducibility</span></span>
-<span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simPE.html">simPE</a></span><span class="op">(</span></span>
-<span>  n <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  time_points <span class="op">=</span> <span class="va">true_times</span>,</span>
-<span>  hazard_rates <span class="op">=</span> <span class="va">true_hazards</span>,</span>
-<span>  max_time <span class="op">=</span> <span class="fl">24</span>,</span>
-<span>  censoring_prob <span class="op">=</span> <span class="fl">0.15</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span>  <span class="co"># Ensures reproducible results</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create KM table and validate</span></span>
-<span><span class="va">km_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/summaryKM.html">summaryKM</a></span><span class="op">(</span><span class="va">sim_data</span>, <span class="va">true_times</span><span class="op">)</span></span>
-<span><span class="va">validation_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span><span class="va">true_times</span>, <span class="va">km_table</span><span class="op">$</span><span class="va">n_risk</span>, <span class="va">km_table</span><span class="op">$</span><span class="va">n_censored_cumulative</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Compare true vs estimated hazards</span></span>
-<span><span class="va">hazard_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  True_Hazard <span class="op">=</span> <span class="va">true_hazards</span>,</span>
-<span>  Estimated_Hazard <span class="op">=</span> <span class="va">validation_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">hazard_rate</span>,</span>
-<span>  Relative_Error <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">validation_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">hazard_rate</span> <span class="op">-</span> <span class="va">true_hazards</span><span class="op">)</span> <span class="op">/</span> <span class="va">true_hazards</span> <span class="op">*</span> <span class="fl">100</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hazard_comparison</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Median survival time:"</span>, <span class="va">result</span><span class="op">$</span><span class="va">median_survival</span>, <span class="st">"months"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="mathematical-background">Mathematical Background<a class="anchor" aria-label="anchor" href="#mathematical-background"></a>
+<h2 id="methodology">Methodology<a class="anchor" aria-label="anchor" href="#methodology"></a>
 </h2>
-<p>The package implements survival analysis methods based on:</p>
+<p>The package implements the person-years method for hazard estimation based on the following assumptions:</p>
 <ul>
 <li>
-<strong>Person-years method</strong>: Calculates hazard rates as events per person-time using trapezoidal rule</li>
+<strong>Piecewise exponential survival</strong> within each time interval</li>
 <li>
-<strong>Piecewise exponential model</strong>: Assumes constant hazard within intervals</li>
+<strong>Non-informative censoring</strong> independent of the event process<br>
+</li>
 <li>
-<strong>Median survival estimation</strong>: Uses exponential survival function: S(t) = exp(-∑λⱼΔtⱼ)</li>
+<strong>Uniform distribution</strong> of events and censoring within intervals</li>
+</ul>
+<p>For detailed mathematical background, see the <a href="https://gosukehommaEX.github.io/mimicsurv/articles/getting-started.html">Getting Started vignette</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="use-cases">Use Cases<a class="anchor" aria-label="anchor" href="#use-cases"></a>
+</h2>
+<ul>
+<li>
+<strong>Systematic reviews</strong> and meta-analyses</li>
+<li><strong>Comparative effectiveness research</strong></li>
+<li><strong>Health technology assessment</strong></li>
+<li>
+<strong>Clinical trial re-analysis</strong> and validation</li>
+<li>
+<strong>Academic research</strong> when individual patient data (IPD) is unavailable</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a>
+<h2 id="real-world-applications">Real-World Applications<a class="anchor" aria-label="anchor" href="#real-world-applications"></a>
 </h2>
-<p><strong>Gosuke Homma</strong><br>
-GitHub: <a href="https://github.com/gosukehommaEX" class="external-link">gosukehommaEX</a></p>
+<p>The package includes a comprehensive case study analyzing the KEYNOTE-859 clinical trial, demonstrating how to:</p>
+<ul>
+<li>Extract survival data from published Kaplan-Meier curves</li>
+<li>Compare treatment arms (pembrolizumab vs. placebo)</li>
+<li>Estimate hazard rates over time</li>
+<li>Calculate median survival times</li>
+<li>Visualize results with publication-ready figures</li>
+</ul>
+<p>See the <a href="https://gosukehommaEX.github.io/mimicsurv/articles/keynote859-analysis.html">KEYNOTE-859 Analysis vignette</a> for the complete workflow.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>This project is licensed under the MIT License - see the <a href="LICENSE">LICENSE</a> file for details.</p>
+<p>MIT + file LICENSE</p>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>If you use this package in your research, please cite:</p>
+<pre><code>Homma, G. (2025). mimicsurv: Extract Survival Analysis Results from
+Kaplan-Meier Tables Using Person-Years Method. R package version 0.1.0.
+https://github.com/gosukehommaEX/mimicsurv</code></pre>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -214,7 +226,12 @@ GitHub: <a href="https://github.com/gosukehommaEX" class="external-link">gosukeh
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/gosukehommaEX/mimicsurv/actions" class="external-link"><img src="https://github.com/gosukehommaEX/mimicsurv/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
