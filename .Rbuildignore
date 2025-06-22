@@ -17,3 +17,5 @@
 ^docs$
 ^pkgdown$
 ^\.covrignore$
+^doc$
+^Meta$

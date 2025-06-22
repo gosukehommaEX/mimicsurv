@@ -6,6 +6,14 @@ An R package for survival analysis from Kaplan-Meier tables using the person-yea
 
 The `mimicsurv` package provides functions to estimate hazard rates and median survival time from published Kaplan-Meier table data using the person-years method, assuming exponential distribution within each interval. It also includes simulation functions for validation of the estimation methods.
 
+## Documentation
+
+### Quick Start Guide
+📖 **[Getting Started with mimicsurv](https://gosukehommaEX.github.io/mimicsurv/articles/getting-started.html)** - Complete tutorial with examples
+
+### Reference Documentation
+📚 **[Package Reference](https://gosukehommaEX.github.io/mimicsurv/reference/index.html)** - Detailed function documentation
+
 ## Installation
 
 You can install the development version of mimicsurv from GitHub:
@@ -78,13 +86,8 @@ The package implements survival analysis methods based on:
 ## Author
 
 **Gosuke Homma**  
-Email: my.name.is.gosuke@gmail.com  
 GitHub: [gosukehommaEX](https://github.com/gosukehommaEX)
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Bug reports and feature requests are welcome on [GitHub Issues](https://github.com/gosukehommaEX/mimicsurv/issues).

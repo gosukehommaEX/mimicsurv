@@ -63,3 +63,6 @@ Thumbs.db
 /revdep/
 CRAN-RELEASE
 CRAN-SUBMISSION
+/doc/
+/Meta/
+docs

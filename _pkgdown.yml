@@ -1,0 +1,47 @@
+url: https://gosukehommaEX.github.io/mimicsurv/
+home:
+  title: mimicsurv
+  description: >
+    Survival Analysis from Kaplan-Meier Tables Using Person-Years Method
+
+template:
+  bootstrap: 5
+
+navbar:
+  title: "mimicsurv"
+  left:
+    - text: "Reference"
+      href: reference/index.html
+    - text: "Articles"
+      menu:
+        - text: "Getting Started"
+          href: articles/getting-started.html
+    - text: "News"
+      href: news/index.html
+  right:
+    - icon: fa-github
+      href: https://github.com/gosukehommaEX/mimicsurv
+
+reference:
+  - title: "Main Analysis Functions"
+    desc: "Core functions for survival analysis from Kaplan-Meier data"
+    contents:
+      - extractfromKM
+      - getMediansurv
+
+  - title: "Simulation Functions"
+    desc: "Functions for data simulation and validation"
+    contents:
+      - simPE
+      - summaryKM
+      - validate_mimicsurv
+
+articles:
+  - title: "Getting Started"
+    navbar: ~
+    contents:
+    - getting-started
+
+authors:
+  Gosuke Homma:
+    href: https://github.com/gosukehommaEX
