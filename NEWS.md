@@ -1,24 +1,26 @@
 # mimicsurv 0.1.0
 
-## New Features
+## Initial release
 
-* Initial release of mimicsurv package
-* `extractfromKM()`: Extract survival analysis results from Kaplan-Meier tables using person-years method
-* `getMediansurv()`: Calculate median survival time from piecewise exponential parameters
-* `simPE()`: Simulate survival data from piecewise exponential distribution
-* `summaryKM()`: Create Kaplan-Meier style summary tables from simulated data
-* `validate_mimicsurv()`: Comprehensive simulation study for hazard estimation validation
-* Integration with PWEALL package for enhanced simulation capabilities
+### New Features
 
-## Mathematical Methods
+* Added `extractfromKM()` function for extracting survival analysis results from Kaplan-Meier tables using person-years method
+* Added `getMediansurv()` function for median survival time estimation
+* Added simulation functions (`simPE()`, `summaryKM()`, `validate_mimicsurv()`) for methodology validation
+* Comprehensive vignettes including:
+  - Getting Started guide with theoretical foundations
+  - KEYNOTE-859 clinical trial case study
+* Full pkgdown website with documentation and examples
 
-* Person-years method for hazard rate estimation
-* Piecewise exponential survival model
-* Trapezoidal rule for person-time calculation
-* Inverse transform sampling for simulation
+### Documentation
 
-## Documentation
+* Complete function reference documentation
+* Mathematical background and methodology explanation
+* Real-world clinical trial analysis example
+* GitHub Pages website: https://gosukehommaEX.github.io/mimicsurv/
 
-* Complete roxygen2 documentation for all functions
-* Mathematical formulations using LaTeX notation
-* Comprehensive examples and usage guidelines
+### Dependencies
+
+* Suggests: ggplot2, dplyr for visualization in vignettes
+* Suggests: PWEALL for simulation functions
+* Base R implementation for core functionality

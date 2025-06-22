@@ -4,6 +4,8 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/gosukehommaEX/mimicsurv/workflows/R-CMD-check/badge.svg)](https://github.com/gosukehommaEX/mimicsurv/actions)
+[![CRAN status](https://www.r-pkg.org/badges/version/mimicsurv)](https://CRAN.R-project.org/package=mimicsurv)
+[![Codecov test coverage](https://codecov.io/gh/gosukehommaEX/mimicsurv/branch/main/graph/badge.svg)](https://codecov.io/gh/gosukehommaEX/mimicsurv?branch=main)
 <!-- badges: end -->
 
 ## Overview
