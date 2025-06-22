@@ -40,8 +40,8 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-# pkgdown site
-docs/
+# pkgdown site - COMMENTED OUT TO ALLOW GITHUB PAGES
+# docs/
 
 # translation temp files
 po/*~
@@ -63,6 +63,3 @@ Thumbs.db
 /revdep/
 CRAN-RELEASE
 CRAN-SUBMISSION
-/doc/
-/Meta/
-docs
