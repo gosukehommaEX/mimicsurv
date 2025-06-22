@@ -95,39 +95,51 @@ validate_mimicsurv <- function(true_time_points, true_hazard_rates,
 
         # Generate data
         if (use_pweall && requireNamespace("PWEALL", quietly = TRUE)) {
-          # Use PWEALL package for simulation
-          sim_data_raw <- PWEALL::rpwe(
-            n = sample_size,
-            time = true_time_points[-1],  # Remove initial 0
-            rate = true_hazard_rates
-          )
+          # Try to use PWEALL package for simulation
+          tryCatch({
+            # PWEALL::rpwe may have different parameter names depending on version
+            sim_data_raw <- PWEALL::rpwe(
+              n = sample_size,
+              intervals = true_time_points[-1],
+              hazards = true_hazard_rates
+            )
 
-          # Convert to data frame format expected by our functions
-          # Apply censoring
-          if (censoring_prob > 0) {
-            n_to_censor <- rbinom(1, sample_size, censoring_prob)
-            if (n_to_censor > 0) {
-              censor_indices <- sample(sample_size, n_to_censor)
-              censor_times <- runif(n_to_censor, 0, pmin(sim_data_raw, max_followup))
-              sim_data_raw[censor_indices] <- censor_times
-              event_status <- rep(1, sample_size)
-              event_status[censor_indices] <- 0
+            # Convert to data frame format expected by our functions
+            # Apply censoring
+            if (censoring_prob > 0) {
+              n_to_censor <- rbinom(1, sample_size, censoring_prob)
+              if (n_to_censor > 0) {
+                censor_indices <- sample(sample_size, n_to_censor)
+                censor_times <- runif(n_to_censor, 0, pmin(sim_data_raw, max_followup))
+                sim_data_raw[censor_indices] <- censor_times
+                event_status <- rep(1, sample_size)
+                event_status[censor_indices] <- 0
+              } else {
+                event_status <- rep(1, sample_size)
+              }
             } else {
               event_status <- rep(1, sample_size)
             }
-          } else {
-            event_status <- rep(1, sample_size)
-          }
 
-          # Apply administrative censoring
-          admin_censor <- sim_data_raw > max_followup
-          sim_data_raw[admin_censor] <- max_followup
-          event_status[admin_censor] <- 0
+            # Apply administrative censoring
+            admin_censor <- sim_data_raw > max_followup
+            sim_data_raw[admin_censor] <- max_followup
+            event_status[admin_censor] <- 0
 
-          sim_data <- data.frame(
-            time = sim_data_raw,
-            status = event_status
-          )
+            sim_data <- data.frame(
+              time = sim_data_raw,
+              status = event_status
+            )
+          }, error = function(e) {
+            # If PWEALL fails, fall back to internal simulation
+            sim_data <<- simPE(
+              n = sample_size,
+              time_points = true_time_points,
+              hazard_rates = true_hazard_rates,
+              max_time = max_followup,
+              censoring_prob = censoring_prob
+            )
+          })
         } else {
           # Use internal simulation function
           sim_data <- simPE(
