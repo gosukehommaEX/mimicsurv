@@ -75,7 +75,7 @@ test_that("getMediansurv input validation works", {
   # Test mismatched lengths
   expect_error(
     getMediansurv(c(0, 6, 12), c(0.05, 0.08, 0.12, 0.15)),
-    "Length of time_points should be length of hazard_rates + 1"
+    "Length of time_points should be length of hazard_rates \\+ 1"
   )
 
   # Test negative hazard rates

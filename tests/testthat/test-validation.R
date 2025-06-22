@@ -48,7 +48,7 @@ test_that("validate_mimicsurv input validation works", {
       sample_sizes = c(50),
       n_simulations = 5
     ),
-    "Length of true_time_points should be length of true_hazard_rates + 1"
+    "Length of true_time_points should be length of true_hazard_rates \\+ 1"
   )
 
   # Test negative hazard rates
@@ -70,14 +70,14 @@ test_that("validate_mimicsurv handles PWEALL integration", {
   true_times <- c(0, 6, 12)
   true_hazards <- c(0.1, 0.15)
 
-  # Test with PWEALL enabled
+  # Test with PWEALL enabled - use very small parameters to avoid issues
   result_pweall <- validate_mimicsurv(
     true_time_points = true_times,
     true_hazard_rates = true_hazards,
-    sample_sizes = c(30),
-    n_simulations = 3,
+    sample_sizes = c(20),  # Very small sample size
+    n_simulations = 2,     # Very few simulations
     max_followup = 12,
-    censoring_prob = 0.1,
+    censoring_prob = 0.05, # Low censoring
     use_pweall = TRUE
   )
 

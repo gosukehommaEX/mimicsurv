@@ -217,13 +217,23 @@ validate_mimicsurv <- function(true_time_points, true_hazard_rates,
   }
 
   # Overall summary
-  summary_stats <- data.frame(
-    sample_size = sample_sizes,
-    convergence_rate = sapply(results, function(x) x$convergence_rate),
-    median_bias = sapply(results, function(x) x$median_results$bias),
-    median_mse = sapply(results, function(x) x$median_results$mse),
-    stringsAsFactors = FALSE
-  )
+  if (length(results) > 0) {
+    summary_stats <- data.frame(
+      sample_size = sample_sizes,
+      convergence_rate = sapply(results, function(x) x$convergence_rate),
+      median_bias = sapply(results, function(x) x$median_results$bias),
+      median_mse = sapply(results, function(x) x$median_results$mse),
+      stringsAsFactors = FALSE
+    )
+  } else {
+    summary_stats <- data.frame(
+      sample_size = numeric(0),
+      convergence_rate = numeric(0),
+      median_bias = numeric(0),
+      median_mse = numeric(0),
+      stringsAsFactors = FALSE
+    )
+  }
 
   return(list(
     simulation_parameters = list(

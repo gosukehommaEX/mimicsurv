@@ -55,7 +55,7 @@ getMediansurv <- function(time_points, hazard_rates) {
   # Check if median is reachable
   final_survival <- survival_probs[length(survival_probs)]
   if (final_survival >= 0.5) {
-    return(NA)  # Median not reached
+    return(as.numeric(NA))  # Median not reached
   }
 
   # Find interval containing median
@@ -68,7 +68,7 @@ getMediansurv <- function(time_points, hazard_rates) {
   prev_survival <- if (median_interval == 1) 1.0 else survival_probs[median_interval]
 
   if (lambda == 0) {
-    return(NA)  # Cannot calculate if hazard is zero
+    return(as.numeric(NA))  # Cannot calculate if hazard is zero
   }
 
   median_time <- t_start + (1 / lambda) * log(prev_survival / 0.5)
