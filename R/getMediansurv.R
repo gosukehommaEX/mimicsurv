@@ -26,8 +26,6 @@
 #' median_time <- getMediansurv(time_points, hazard_rates)
 #' print(paste("Median survival:", round(median_time, 2), "months"))
 #'
-#' @importFrom stats diff
-#'
 #' @export
 
 getMediansurv <- function(time_points, hazard_rates) {

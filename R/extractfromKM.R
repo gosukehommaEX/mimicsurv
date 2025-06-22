@@ -32,8 +32,6 @@
 #' print(result$hazard_table)
 #' print(paste("Median survival:", result$median_survival, "months"))
 #'
-#' @importFrom stats diff
-#'
 #' @export
 
 extractfromKM <- function(time_points, n_risk, n_censored,

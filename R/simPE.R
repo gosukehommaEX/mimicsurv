@@ -34,7 +34,7 @@
 #' # Check event rate
 #' table(sim_data$status)
 #'
-#' @importFrom stats runif findInterval
+#' @importFrom stats runif
 #'
 #' @export
 

@@ -51,8 +51,7 @@
 #' # View summary statistics
 #' print(validation_result$summary_statistics)
 #'
-#' @importFrom utils requireNamespace
-#' @importFrom stats rbinom runif pmin
+#' @importFrom stats rbinom runif
 #'
 #' @export
 

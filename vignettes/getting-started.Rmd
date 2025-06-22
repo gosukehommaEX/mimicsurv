@@ -1,13 +1,13 @@
 ---
-  title: "Getting Started with mimicsurv"
+title: "Getting Started with mimicsurv"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Getting Started with mimicsurv}
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
-  
-  ```{r, include = FALSE}
+
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -27,8 +27,8 @@ The `mimicsurv` package provides tools for survival analysis from published Kapl
 ### Extracting Results from Kaplan-Meier Tables
 
 The main function `extractfromKM()` estimates hazard rates and median survival time from published Kaplan-Meier data:
-  
-  ```{r basic-analysis}
+
+```{r basic-analysis}
 # Example data from a hypothetical study
 time_points <- c(0, 6, 12, 18, 24)
 n_risk <- c(200, 165, 130, 95, 65)
@@ -47,8 +47,8 @@ cat("Median survival time:", result$median_survival, "months\n")
 ### Understanding the Results
 
 The hazard table shows:
-  
-  - **interval**: Time intervals for hazard estimation
+
+- **interval**: Time intervals for hazard estimation
 - **n_at_risk_start**: Number of patients at risk at the start of each interval
 - **n_censored_interval**: Number of patients censored within each interval
 - **n_events**: Number of events (estimated) within each interval
@@ -57,30 +57,30 @@ The hazard table shows:
 ## Mathematical Background
 
 The package implements the person-years method with the following key concepts:
-  
-  ### Person-Time Calculation
-  
-  Person-time is calculated using the trapezoidal rule:
-  
-  $$\text{Person-time} = \frac{n_{\text{risk},i} + n_{\text{risk},i+1}}{2} \times (t_{i+1} - t_i)$$
-  
-  ### Hazard Rate Estimation
-  
-  Hazard rates are estimated as:
-  
-  $$\lambda_i = \frac{\text{Number of events}_i}{\text{Person-time}_i}$$
-  
-  ### Median Survival Time
-  
-  For piecewise exponential survival, the median is found where:
-  
-  $$S(t) = \exp\left(-\sum_{j=1}^{k} \lambda_j \Delta t_j\right) = 0.5$$
-  
-  ## Simulation and Validation
-  
-  ### Generating Simulated Data
-  
-  ```{r simulation}
+
+### Person-Time Calculation
+
+Person-time is calculated using the trapezoidal rule:
+
+$$\text{Person-time} = \frac{n_{\text{risk},i} + n_{\text{risk},i+1}}{2} \times (t_{i+1} - t_i)$$
+
+### Hazard Rate Estimation
+
+Hazard rates are estimated as:
+
+$$\lambda_i = \frac{\text{Number of events}_i}{\text{Person-time}_i}$$
+
+### Median Survival Time
+
+For piecewise exponential survival, the median is found where:
+
+$$S(t) = \exp\left(-\sum_{j=1}^{k} \lambda_j \Delta t_j\right) = 0.5$$
+
+## Simulation and Validation
+
+### Generating Simulated Data
+
+```{r simulation}
 # Define piecewise exponential parameters
 time_points <- c(0, 6, 12, 18, 24)
 hazard_rates <- c(0.05, 0.08, 0.12, 0.15)
@@ -132,8 +132,8 @@ print(validation_result$summary_statistics)
 ### Calculating True Median Survival
 
 You can calculate the theoretical median survival time directly:
-  
-  ```{r true-median}
+
+```{r true-median}
 # Calculate true median for comparison
 true_median <- getMediansurv(time_points, hazard_rates)
 cat("True median survival:", round(true_median, 2), "months\n")
@@ -142,8 +142,8 @@ cat("True median survival:", round(true_median, 2), "months\n")
 ### Handling Different Scenarios
 
 The package handles various scenarios:
-  
-  - **High censoring rates**: Appropriate for studies with substantial loss to follow-up
+
+- **High censoring rates**: Appropriate for studies with substantial loss to follow-up
 - **Multiple intervals**: Flexible number of time intervals
 - **Missing median**: Returns NA when median survival is not reached
 
