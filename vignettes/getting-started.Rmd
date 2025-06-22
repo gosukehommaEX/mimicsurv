@@ -31,8 +31,8 @@ The main function `extractfromKM()` estimates hazard rates and median survival t
 ```{r basic-analysis}
 # Example data from a hypothetical study
 time_points <- c(0, 6, 12, 18, 24)
-n_risk <- c(200, 165, 130, 95, 65)
-n_censored <- c(0, 15, 35, 53, 65)
+n_risk <- c(200, 150, 100, 60, 35)
+n_censored <- c(0, 10, 20, 30, 40)
 
 # Extract survival analysis results
 result <- extractfromKM(time_points, n_risk, n_censored)
@@ -111,10 +111,14 @@ print("Cumulative censored:")
 print(km_summary$n_censored_cumulative)
 ```
 
-### Validation Study
+## Validation Study
+
+### Comprehensive Validation
+
+The `validate_mimicsurv()` function provides comprehensive validation of the hazard estimation methods:
 
 ```{r validation, eval=FALSE}
-# Run validation study (small example)
+# Run validation study (small example for demonstration)
 validation_result <- validate_mimicsurv(
   true_time_points = time_points,
   true_hazard_rates = hazard_rates,
@@ -125,6 +129,61 @@ validation_result <- validate_mimicsurv(
 
 # View summary statistics
 print(validation_result$summary_statistics)
+
+# View detailed results for one sample size
+print(validation_result$detailed_results$n_200$hazard_results)
+```
+
+### Method Validation Example
+
+Here's a practical example showing how well our method recovers known parameters:
+
+```{r practical-validation}
+# Set known "true" parameters
+true_times <- c(0, 6, 12, 18, 24)
+true_hazards <- c(0.04, 0.055, 0.06, 0.05)  # Monthly hazard rates
+
+# Calculate true median survival
+true_median <- getMediansurv(true_times, true_hazards)
+cat("True median survival:", round(true_median, 1), "months\n")
+
+# Simulate data using these parameters
+set.seed(123)  # For reproducible results
+sim_data <- simPE(
+  n = 500,  # Larger sample for better precision
+  time_points = true_times,
+  hazard_rates = true_hazards,
+  max_time = 24,
+  censoring_prob = 0.1
+)
+
+# Create KM table from simulated data
+km_table <- summaryKM(sim_data, true_times)
+
+# Estimate parameters from the KM table
+estimated_result <- extractfromKM(
+  time_points = true_times,
+  n_risk = km_table$n_risk,
+  n_censored = km_table$n_censored_cumulative
+)
+
+# Compare results
+comparison <- data.frame(
+  Interval = estimated_result$hazard_table$interval,
+  True_Hazard = true_hazards,
+  Estimated_Hazard = estimated_result$hazard_table$hazard_rate,
+  Relative_Error = (estimated_result$hazard_table$hazard_rate - true_hazards) / true_hazards * 100
+)
+
+print("Validation Results:")
+print(comparison)
+
+cat("\nMedian Survival Comparison:\n")
+cat("True median:", round(true_median, 1), "months\n")
+cat("Estimated median:", round(estimated_result$median_survival, 1), "months\n")
+if (!is.na(estimated_result$median_survival)) {
+  cat("Relative error:", round((estimated_result$median_survival - true_median)/true_median * 100, 1), "%\n")
+}
 ```
 
 ## Advanced Usage

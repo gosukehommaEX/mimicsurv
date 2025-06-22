@@ -77,8 +77,16 @@ extractfromKM <- function(time_points, n_risk, n_censored,
     n_events[n_events < 0] <- 0
   }
 
-  # Calculate person-time using trapezoidal rule
-  person_time <- (n_risk[1:n_intervals] + n_risk[2:(n_intervals + 1)]) / 2 * diff(time_points)
+  # Calculate person-time using epidemiologically correct method
+  # Person-time = (number with neither event nor censoring) * interval_length +
+  #               (number with event or censoring) * interval_length/2
+  person_time <- numeric(n_intervals)
+  for (i in 1:n_intervals) {
+    interval_length <- diff(time_points)[i]
+    n_neither <- n_risk[i + 1]  # Neither event nor censored in this interval
+    n_event_or_censor <- n_events[i] + n_censored_interval[i]  # Event or censored in this interval
+    person_time[i] <- n_neither * interval_length + n_event_or_censor * interval_length / 2
+  }
 
   # Calculate hazard rates
   hazard_rates <- ifelse(person_time > 0, n_events / person_time, 0)

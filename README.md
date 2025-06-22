@@ -53,8 +53,8 @@ library(mimicsurv)
 
 # Example: Basic survival analysis from KM table
 time_points <- c(0, 6, 12, 18, 24)
-n_risk <- c(200, 165, 130, 95, 65)
-n_censored <- c(0, 15, 35, 53, 65)
+n_risk <- c(200, 150, 100, 60, 35)
+n_censored <- c(0, 10, 20, 30, 40)
 
 result <- extractfromKM(time_points, n_risk, n_censored)
 print(result$hazard_table)
