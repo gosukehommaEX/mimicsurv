@@ -4,7 +4,14 @@
 \alias{simPE}
 \title{Simulate Survival Data from Piecewise Exponential Distribution}
 \usage{
-simPE(n, time_points, hazard_rates, max_time, censoring_prob = 0.1)
+simPE(
+  n,
+  time_points,
+  hazard_rates,
+  max_time,
+  censoring_prob = 0.1,
+  seed = NULL
+)
 }
 \arguments{
 \item{n}{Sample size (number of subjects to simulate)}
@@ -16,6 +23,8 @@ simPE(n, time_points, hazard_rates, max_time, censoring_prob = 0.1)
 \item{max_time}{Maximum follow-up time (administrative censoring)}
 
 \item{censoring_prob}{Probability of random censoring (default 0.1)}
+
+\item{seed}{Random seed for reproducibility (default NULL)}
 }
 \value{
 Data frame with columns:
@@ -41,10 +50,16 @@ sim_data <- simPE(
   time_points = time_points,
   hazard_rates = hazard_rates,
   max_time = 24,
-  censoring_prob = 0.15
+  censoring_prob = 0.15,
+  seed = 123
 )
 
 # Check event rate
 table(sim_data$status)
+
+# Reproducible results
+sim_data1 <- simPE(n = 100, time_points, hazard_rates, 24, seed = 456)
+sim_data2 <- simPE(n = 100, time_points, hazard_rates, 24, seed = 456)
+identical(sim_data1, sim_data2)  # Should be TRUE
 
 }
