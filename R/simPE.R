@@ -62,69 +62,46 @@ simPE <- function(n, time_points, hazard_rates, max_time, censoring_prob = 0.1) 
     survival_probs[i + 1] <- exp(-cumulative_hazards[i + 1])
   }
 
-  # Initialize output vectors
+  # Generate survival times using inverse transform sampling
   survival_times <- numeric(n)
-  event_status <- numeric(n)
 
-  for (i in 1:n) {
-    # Generate uniform random number
+  for (j in 1:n) {
     u <- runif(1)
+    target_cum_hazard <- -log(u)
 
-    # Find which interval the event would occur in
-    survival_target <- 1 - u
+    # Find which interval the target cumulative hazard falls into
+    survival_time <- max_time  # Default to max_time if beyond all intervals
 
-    # Check if event occurs within study period
-    if (survival_target <= survival_probs[length(survival_probs)]) {
-      # Administrative censoring
-      survival_times[i] <- max_time
-      event_status[i] <- 0
-    } else {
-      # Find interval containing the event using manual search
-      # since survival_probs is decreasing from 1 to smallest value
-      interval_idx <- 1
-      for (j in 1:length(survival_probs)) {
-        if (survival_target > survival_probs[j]) {
-          interval_idx <- j
-          break
-        }
-      }
-      interval_idx <- min(interval_idx, n_intervals)
-
-      # Calculate exact time within interval
-      if (hazard_rates[interval_idx] > 0) {
-        t_start <- time_points[interval_idx]
-        prev_survival <- if (interval_idx == 1) 1.0 else survival_probs[interval_idx]
-
-        # Ensure we don't take log of negative number
-        if (prev_survival > 0 && survival_target > 0 && prev_survival >= survival_target) {
-          survival_time <- t_start + (1 / hazard_rates[interval_idx]) * log(prev_survival / survival_target)
-        } else {
-          survival_time <- max_time
-        }
-      } else {
-        # If hazard is zero, event doesn't occur in this interval
-        survival_time <- max_time
-      }
-
-      # Ensure survival time is within bounds
-      survival_time <- max(0, min(survival_time, max_time))
-
-      # Apply random censoring
-      if (runif(1) < censoring_prob && survival_time < max_time) {
-        # Random censoring
-        censoring_time <- runif(1, 0, survival_time)
-        survival_times[i] <- censoring_time
-        event_status[i] <- 0
-      } else {
-        # Event occurs
-        survival_times[i] <- survival_time
-        event_status[i] <- 1
+    for (i in 1:n_intervals) {
+      if (target_cum_hazard <= cumulative_hazards[i + 1]) {
+        # Target falls in interval i
+        remaining_hazard <- target_cum_hazard - cumulative_hazards[i]
+        time_in_interval <- remaining_hazard / hazard_rates[i]
+        survival_time <- time_points[i] + time_in_interval
+        break
       }
     }
+
+    # If target_cum_hazard is beyond the last interval, extrapolate
+    if (target_cum_hazard > cumulative_hazards[n_intervals + 1]) {
+      remaining_hazard <- target_cum_hazard - cumulative_hazards[n_intervals + 1]
+      time_beyond_last <- remaining_hazard / hazard_rates[n_intervals]
+      survival_time <- time_points[n_intervals + 1] + time_beyond_last
+    }
+
+    survival_times[j] <- survival_time
   }
 
-  return(data.frame(
-    time = survival_times,
-    status = event_status
-  ))
+  # Apply administrative censoring
+  survival_times <- pmin(survival_times, max_time)
+
+  # Apply random censoring
+  censoring_times <- runif(n, 0, max_time)
+  should_censor <- runif(n) < censoring_prob
+
+  observed_times <- ifelse(should_censor & censoring_times < survival_times,
+                           censoring_times, survival_times)
+  status <- ifelse(should_censor & censoring_times < survival_times, 0, 1)
+
+  return(data.frame(time = observed_times, status = status))
 }
