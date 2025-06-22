@@ -131,19 +131,31 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Median survival:"</span>, <span class="va">result</span><span class="op">$</span><span class="va">median_survival</span>, <span class="st">"months"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Example: Simulation validation</span></span>
+<span><span class="co"># Example: Simulation validation with reproducible results</span></span>
 <span><span class="va">true_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span><span class="op">)</span></span>
 <span><span class="va">true_hazards</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">validation_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/validate_mimicsurv.html">validate_mimicsurv</a></span><span class="op">(</span></span>
-<span>  true_time_points <span class="op">=</span> <span class="va">true_times</span>,</span>
-<span>  true_hazard_rates <span class="op">=</span> <span class="va">true_hazards</span>,</span>
-<span>  sample_sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">200</span><span class="op">)</span>,</span>
-<span>  n_simulations <span class="op">=</span> <span class="fl">50</span>,</span>
-<span>  censoring_prob <span class="op">=</span> <span class="fl">0.15</span></span>
+<span><span class="co"># Simulate data with seed for reproducibility</span></span>
+<span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simPE.html">simPE</a></span><span class="op">(</span></span>
+<span>  n <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  time_points <span class="op">=</span> <span class="va">true_times</span>,</span>
+<span>  hazard_rates <span class="op">=</span> <span class="va">true_hazards</span>,</span>
+<span>  max_time <span class="op">=</span> <span class="fl">24</span>,</span>
+<span>  censoring_prob <span class="op">=</span> <span class="fl">0.15</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span>  <span class="co"># Ensures reproducible results</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">validation_result</span><span class="op">$</span><span class="va">summary_statistics</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Create KM table and validate</span></span>
+<span><span class="va">km_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/summaryKM.html">summaryKM</a></span><span class="op">(</span><span class="va">sim_data</span>, <span class="va">true_times</span><span class="op">)</span></span>
+<span><span class="va">validation_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span><span class="va">true_times</span>, <span class="va">km_table</span><span class="op">$</span><span class="va">n_risk</span>, <span class="va">km_table</span><span class="op">$</span><span class="va">n_censored_cumulative</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compare true vs estimated hazards</span></span>
+<span><span class="va">hazard_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  True_Hazard <span class="op">=</span> <span class="va">true_hazards</span>,</span>
+<span>  Estimated_Hazard <span class="op">=</span> <span class="va">validation_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">hazard_rate</span>,</span>
+<span>  Relative_Error <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">validation_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">hazard_rate</span> <span class="op">-</span> <span class="va">true_hazards</span><span class="op">)</span> <span class="op">/</span> <span class="va">true_hazards</span> <span class="op">*</span> <span class="fl">100</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hazard_comparison</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="mathematical-background">Mathematical Background<a class="anchor" aria-label="anchor" href="#mathematical-background"></a>
