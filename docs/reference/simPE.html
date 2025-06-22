@@ -44,7 +44,14 @@ exponential distribution with specified time intervals and hazard rates.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simPE</span><span class="op">(</span><span class="va">n</span>, <span class="va">time_points</span>, <span class="va">hazard_rates</span>, <span class="va">max_time</span>, censoring_prob <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simPE</span><span class="op">(</span></span>
+<span>  <span class="va">n</span>,</span>
+<span>  <span class="va">time_points</span>,</span>
+<span>  <span class="va">hazard_rates</span>,</span>
+<span>  <span class="va">max_time</span>,</span>
+<span>  censoring_prob <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -69,6 +76,10 @@ exponential distribution with specified time intervals and hazard rates.</p>
 
 <dt id="arg-censoring-prob">censoring_prob<a class="anchor" aria-label="anchor" href="#arg-censoring-prob"></a></dt>
 <dd><p>Probability of random censoring (default 0.1)</p></dd>
+
+
+<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dd><p>Random seed for reproducibility (default NULL)</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -99,14 +110,22 @@ uniformly between 0 and the simulated survival time.</p>
 <span class="r-in"><span>  time_points <span class="op">=</span> <span class="va">time_points</span>,</span></span>
 <span class="r-in"><span>  hazard_rates <span class="op">=</span> <span class="va">hazard_rates</span>,</span></span>
 <span class="r-in"><span>  max_time <span class="op">=</span> <span class="fl">24</span>,</span></span>
-<span class="r-in"><span>  censoring_prob <span class="op">=</span> <span class="fl">0.15</span></span></span>
+<span class="r-in"><span>  censoring_prob <span class="op">=</span> <span class="fl">0.15</span>,</span></span>
+<span class="r-in"><span>  seed <span class="op">=</span> <span class="fl">123</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in simPE(n = 200, time_points = time_points, hazard_rates = hazard_rates,     max_time = 24, censoring_prob = 0.15, seed = 123):</span> unused argument (seed = 123)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Check event rate</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">$</span><span class="va">status</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0   1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  25 175 </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'sim_data' not found</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Reproducible results</span></span></span>
+<span class="r-in"><span><span class="va">sim_data1</span> <span class="op">&lt;-</span> <span class="fu">simPE</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span>, <span class="va">time_points</span>, <span class="va">hazard_rates</span>, <span class="fl">24</span>, seed <span class="op">=</span> <span class="fl">456</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in simPE(n = 100, time_points, hazard_rates, 24, seed = 456):</span> unused argument (seed = 456)</span>
+<span class="r-in"><span><span class="va">sim_data2</span> <span class="op">&lt;-</span> <span class="fu">simPE</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">100</span>, <span class="va">time_points</span>, <span class="va">hazard_rates</span>, <span class="fl">24</span>, seed <span class="op">=</span> <span class="fl">456</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in simPE(n = 100, time_points, hazard_rates, 24, seed = 456):</span> unused argument (seed = 456)</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">sim_data1</span>, <span class="va">sim_data2</span><span class="op">)</span>  <span class="co"># Should be TRUE</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'sim_data1' not found</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
