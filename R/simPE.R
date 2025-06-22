@@ -79,20 +79,35 @@ simPE <- function(n, time_points, hazard_rates, max_time, censoring_prob = 0.1) 
       survival_times[i] <- max_time
       event_status[i] <- 0
     } else {
-      # Find interval containing the event
-      interval_idx <- findInterval(survival_target, survival_probs, rightmost.closed = TRUE)
-      interval_idx <- max(1, interval_idx - 1)
+      # Find interval containing the event using manual search
+      # since survival_probs is decreasing from 1 to smallest value
+      interval_idx <- 1
+      for (j in 1:length(survival_probs)) {
+        if (survival_target > survival_probs[j]) {
+          interval_idx <- j
+          break
+        }
+      }
       interval_idx <- min(interval_idx, n_intervals)
 
       # Calculate exact time within interval
       if (hazard_rates[interval_idx] > 0) {
         t_start <- time_points[interval_idx]
         prev_survival <- if (interval_idx == 1) 1.0 else survival_probs[interval_idx]
-        survival_time <- t_start + (1 / hazard_rates[interval_idx]) * log(prev_survival / survival_target)
+
+        # Ensure we don't take log of negative number
+        if (prev_survival > 0 && survival_target > 0 && prev_survival >= survival_target) {
+          survival_time <- t_start + (1 / hazard_rates[interval_idx]) * log(prev_survival / survival_target)
+        } else {
+          survival_time <- max_time
+        }
       } else {
         # If hazard is zero, event doesn't occur in this interval
         survival_time <- max_time
       }
+
+      # Ensure survival time is within bounds
+      survival_time <- max(0, min(survival_time, max_time))
 
       # Apply random censoring
       if (runif(1) < censoring_prob && survival_time < max_time) {
