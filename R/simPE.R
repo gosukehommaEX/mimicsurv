@@ -8,6 +8,7 @@
 #' @param hazard_rates Numeric vector of hazard rates for each interval
 #' @param max_time Maximum follow-up time (administrative censoring)
 #' @param censoring_prob Probability of random censoring (default 0.1)
+#' @param seed Random seed for reproducibility (default NULL)
 #'
 #' @return Data frame with columns:
 #'   \item{time}{Observed time (either event time or censoring time)}
@@ -28,17 +29,28 @@
 #'   time_points = time_points,
 #'   hazard_rates = hazard_rates,
 #'   max_time = 24,
-#'   censoring_prob = 0.15
+#'   censoring_prob = 0.15,
+#'   seed = 123
 #' )
 #'
 #' # Check event rate
 #' table(sim_data$status)
 #'
+#' # Reproducible results
+#' sim_data1 <- simPE(n = 100, time_points, hazard_rates, 24, seed = 456)
+#' sim_data2 <- simPE(n = 100, time_points, hazard_rates, 24, seed = 456)
+#' identical(sim_data1, sim_data2)  # Should be TRUE
+#'
 #' @importFrom stats runif
 #'
 #' @export
 
-simPE <- function(n, time_points, hazard_rates, max_time, censoring_prob = 0.1) {
+simPE <- function(n, time_points, hazard_rates, max_time, censoring_prob = 0.1, seed = NULL) {
+
+  # Set seed for reproducibility if provided
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
 
   # Input validation
   if (length(time_points) != length(hazard_rates) + 1) {
