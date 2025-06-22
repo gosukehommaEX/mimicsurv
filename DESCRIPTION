@@ -16,18 +16,18 @@ Description: This package provides functions to estimate hazard rates and median
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Depends: 
     R (>= 3.5.0)
 Imports: 
     stats,
-    utils,
-    PWEALL
+    utils
 Suggests: 
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
-    ggplot2
+    ggplot2,
+    PWEALL
 VignetteBuilder: knitr
 URL: https://github.com/gosukehommaEX/mimicsurv
 BugReports: https://github.com/gosukehommaEX/mimicsurv/issues

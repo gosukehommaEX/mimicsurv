@@ -52,7 +52,6 @@
 #' print(validation_result$summary_statistics)
 #'
 #' @importFrom utils requireNamespace
-#' @importFrom PWEALL rpwe
 #' @importFrom stats rbinom runif pmin
 #'
 #' @export
