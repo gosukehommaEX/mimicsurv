@@ -1,26 +1,90 @@
-
 # mimicsurv
 
-<!-- badges: start -->
-<!-- badges: end -->
+An R package for survival analysis from Kaplan-Meier tables using the person-years method.
 
-The goal of mimicsurv is to ...
+## Overview
+
+The `mimicsurv` package provides functions to estimate hazard rates and median survival time from published Kaplan-Meier table data using the person-years method, assuming exponential distribution within each interval. It also includes simulation functions for validation of the estimation methods.
 
 ## Installation
 
-You can install the development version of mimicsurv from [GitHub](https://github.com/) with:
+You can install the development version of mimicsurv from GitHub:
 
-``` r
-# install.packages("pak")
-pak::pak("gosukehommaEX/mimicsurv")
+```r
+# Install devtools if you haven't already
+install.packages("devtools")
+
+# Install mimicsurv from GitHub
+devtools::install_github("gosukehommaEX/mimicsurv")
 ```
 
-## Example
+## Dependencies
 
-This is a basic example which shows you how to solve a common problem:
+This package requires the following R packages:
+- `stats` (base R)
+- `utils` (base R)
+- `PWEALL` (for simulation validation)
 
-``` r
+## Main Functions
+
+### Core Analysis Functions
+
+- `extractfromKM()`: Extract survival analysis results from Kaplan-Meier table using person-years method
+- `getMediansurv()`: Calculate median survival time from piecewise exponential parameters
+
+### Simulation Functions
+
+- `simPE()`: Simulate survival data from piecewise exponential distribution
+- `summaryKM()`: Create Kaplan-Meier style summary table from simulated data
+- `validate_mimicsurv()`: Comprehensive simulation study for hazard estimation validation
+
+## Example Usage
+
+```r
 library(mimicsurv)
-## basic example code
+
+# Example: Basic survival analysis from KM table
+time_points <- c(0, 6, 12, 18, 24)
+n_risk <- c(200, 165, 130, 95, 65)
+n_censored <- c(0, 15, 35, 53, 65)
+
+result <- extractfromKM(time_points, n_risk, n_censored)
+print(result$hazard_table)
+print(paste("Median survival:", result$median_survival, "months"))
+
+# Example: Simulation validation
+true_times <- c(0, 6, 12, 18, 24)
+true_hazards <- c(0.05, 0.08, 0.12, 0.15)
+
+validation_result <- validate_mimicsurv(
+  true_time_points = true_times,
+  true_hazard_rates = true_hazards,
+  sample_sizes = c(100, 200),
+  n_simulations = 50,
+  censoring_prob = 0.15
+)
+
+print(validation_result$summary_statistics)
 ```
 
+## Mathematical Background
+
+The package implements survival analysis methods based on:
+
+- **Person-years method**: Calculates hazard rates as events per person-time using trapezoidal rule
+- **Piecewise exponential model**: Assumes constant hazard within intervals
+- **Median survival estimation**: Uses exponential survival function: S(t) = exp(-∑λⱼΔtⱼ)
+
+## Author
+
+**Gosuke Homma**  
+Email: my.name.is.gosuke@gmail.com  
+GitHub: [gosukehommaEX](https://github.com/gosukehommaEX)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Bug reports and feature requests are welcome on [GitHub Issues](https://github.com/gosukehommaEX/mimicsurv/issues).

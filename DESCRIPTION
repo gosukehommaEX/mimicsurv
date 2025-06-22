@@ -1,18 +1,33 @@
 Package: mimicsurv
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Survival Analysis from Kaplan-Meier Tables Using Person-Years Method
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Gosuke", "Homma",
+      email = "my.name.is.gosuke@gmail.com",
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Description: This package provides functions to estimate hazard rates and median 
+    survival time from published Kaplan-Meier table data using the person-years 
+    method, assuming exponential distribution within each interval. It also 
+    includes simulation functions for validation of the estimation methods.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.2.3
+Depends: 
+    R (>= 3.5.0)
+Imports: 
+    stats,
+    utils,
+    PWEALL
+Suggests: 
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    ggplot2
+VignetteBuilder: knitr
+URL: https://github.com/gosukehommaEX/mimicsurv
+BugReports: https://github.com/gosukehommaEX/mimicsurv/issues
