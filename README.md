@@ -1,4 +1,4 @@
-# mimicsurv
+# mimicsurv <img src="man/figures/mimicsurv_sticker.png" align="right" height="139" />
 
 > Extract Survival Analysis Results from Kaplan-Meier Tables Using Person-Years Method
 
