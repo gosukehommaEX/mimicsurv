@@ -25,7 +25,8 @@
 #'   n = 200,
 #'   time_points = time_points,
 #'   hazard_rates = hazard_rates,
-#'   max_time = 24
+#'   max_time = 24,
+#'   seed = 456  # For reproducible results
 #' )
 #'
 #' # Create KM table

@@ -60,19 +60,31 @@ result <- extractfromKM(time_points, n_risk, n_censored)
 print(result$hazard_table)
 print(paste("Median survival:", result$median_survival, "months"))
 
-# Example: Simulation validation
+# Example: Simulation validation with reproducible results
 true_times <- c(0, 6, 12, 18, 24)
 true_hazards <- c(0.05, 0.08, 0.12, 0.15)
 
-validation_result <- validate_mimicsurv(
-  true_time_points = true_times,
-  true_hazard_rates = true_hazards,
-  sample_sizes = c(100, 200),
-  n_simulations = 50,
-  censoring_prob = 0.15
+# Simulate data with seed for reproducibility
+sim_data <- simPE(
+  n = 1000,
+  time_points = true_times,
+  hazard_rates = true_hazards,
+  max_time = 24,
+  censoring_prob = 0.15,
+  seed = 123  # Ensures reproducible results
 )
 
-print(validation_result$summary_statistics)
+# Create KM table and validate
+km_table <- summaryKM(sim_data, true_times)
+validation_result <- extractfromKM(true_times, km_table$n_risk, km_table$n_censored_cumulative)
+
+# Compare true vs estimated hazards
+hazard_comparison <- data.frame(
+  True_Hazard = true_hazards,
+  Estimated_Hazard = validation_result$hazard_table$hazard_rate,
+  Relative_Error = abs(validation_result$hazard_table$hazard_rate - true_hazards) / true_hazards * 100
+)
+print(hazard_comparison)
 ```
 
 ## Mathematical Background
