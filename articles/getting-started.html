@@ -411,11 +411,11 @@ we can simulate data to validate our method:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Total subjects:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; - Total subjects: 200</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Events:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">$</span><span class="va">status</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; - Events: 140</span></span>
+<span><span class="co">#&gt; - Events: 184</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Censored:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">$</span><span class="va">status</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Censored: 60</span></span>
+<span><span class="co">#&gt; - Censored: 16</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Event rate:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">$</span><span class="va">status</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; - Event rate: 0.7</span></span></code></pre></div>
+<span><span class="co">#&gt; - Event rate: 0.92</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="creating-summary-tables">Creating Summary Tables<a class="anchor" aria-label="anchor" href="#creating-summary-tables"></a>
@@ -438,16 +438,16 @@ it to the original:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_table</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Time Original_N_Risk Simulated_N_Risk Original_N_Censored</span></span>
 <span><span class="co">#&gt; 1    0             200              200                   0</span></span>
-<span><span class="co">#&gt; 2    6             150              200                  10</span></span>
-<span><span class="co">#&gt; 3   12             100              199                  20</span></span>
-<span><span class="co">#&gt; 4   18              60              199                  30</span></span>
-<span><span class="co">#&gt; 5   24              35              174                  40</span></span>
+<span><span class="co">#&gt; 2    6             150              155                  10</span></span>
+<span><span class="co">#&gt; 3   12             100              107                  20</span></span>
+<span><span class="co">#&gt; 4   18              60               70                  30</span></span>
+<span><span class="co">#&gt; 5   24              35               48                  40</span></span>
 <span><span class="co">#&gt;   Simulated_N_Censored</span></span>
 <span><span class="co">#&gt; 1                    0</span></span>
-<span><span class="co">#&gt; 2                    0</span></span>
-<span><span class="co">#&gt; 3                    1</span></span>
-<span><span class="co">#&gt; 4                    1</span></span>
-<span><span class="co">#&gt; 5                   60</span></span>
+<span><span class="co">#&gt; 2                    7</span></span>
+<span><span class="co">#&gt; 3                   12</span></span>
+<span><span class="co">#&gt; 4                   13</span></span>
+<span><span class="co">#&gt; 5                   16</span></span>
 <span></span>
 <span><span class="co"># Re-estimate hazard rates from simulated data</span></span>
 <span><span class="va">sim_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span></span>
@@ -455,8 +455,6 @@ it to the original:</p>
 <span>  n_risk <span class="op">=</span> <span class="va">km_summary</span><span class="op">$</span><span class="va">n_risk</span>,</span>
 <span>  n_censored <span class="op">=</span> <span class="va">km_summary</span><span class="op">$</span><span class="va">n_censored_cumulative</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in extractfromKM(time_points = time_points, n_risk = km_summary$n_risk,</span></span>
-<span><span class="co">#&gt; : Negative events detected in some intervals. Setting to 0.</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nHazard rate comparison:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -470,10 +468,10 @@ it to the original:</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hazard_comparison</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Interval Original_Hazard Simulated_Hazard Relative_Error</span></span>
-<span><span class="co">#&gt; 1    [0,6)      0.03809524                0            100</span></span>
-<span><span class="co">#&gt; 2   [6,12)      0.05333333                0            100</span></span>
-<span><span class="co">#&gt; 3  [12,18)      0.06250000                0            100</span></span>
-<span><span class="co">#&gt; 4  [18,24)      0.05263158                0            100</span></span></code></pre></div>
+<span><span class="co">#&gt; 1    [0,6)      0.03809524       0.03568075       6.338028</span></span>
+<span><span class="co">#&gt; 2   [6,12)      0.05333333       0.05470738       2.576336</span></span>
+<span><span class="co">#&gt; 3  [12,18)      0.06250000       0.06779661       8.474576</span></span>
+<span><span class="co">#&gt; 4  [18,24)      0.05263158       0.05367232       1.977401</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -534,9 +532,6 @@ parameters:</p>
 <span>  n_risk <span class="op">=</span> <span class="va">large_km_table</span><span class="op">$</span><span class="va">n_risk</span>,</span>
 <span>  n_censored <span class="op">=</span> <span class="va">large_km_table</span><span class="op">$</span><span class="va">n_censored_cumulative</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in extractfromKM(time_points = true_times, n_risk =</span></span>
-<span><span class="co">#&gt; large_km_table$n_risk, : Negative events detected in some intervals. Setting to</span></span>
-<span><span class="co">#&gt; 0.</span></span>
 <span></span>
 <span><span class="co"># Compare results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nValidation Results (n=1000):\n"</span><span class="op">)</span></span>
@@ -550,10 +545,10 @@ parameters:</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">validation_comparison</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Interval True_Hazard Estimated_Hazard Relative_Error</span></span>
-<span><span class="co">#&gt; 1    [0,6)       0.038                0            100</span></span>
-<span><span class="co">#&gt; 2   [6,12)       0.053                0            100</span></span>
-<span><span class="co">#&gt; 3  [12,18)       0.063                0            100</span></span>
-<span><span class="co">#&gt; 4  [18,24)       0.053                0            100</span></span>
+<span><span class="co">#&gt; 1    [0,6)       0.038       0.04466168     17.5307446</span></span>
+<span><span class="co">#&gt; 2   [6,12)       0.053       0.05183413      2.1997532</span></span>
+<span><span class="co">#&gt; 3  [12,18)       0.063       0.06564465      4.1978636</span></span>
+<span><span class="co">#&gt; 4  [18,24)       0.053       0.05319149      0.3613007</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nMedian Survival Comparison:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -561,11 +556,12 @@ parameters:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"True median:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">true_median</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; True median: 14.3 months</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Estimated median:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">estimated_result</span><span class="op">$</span><span class="va">median_survival</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Estimated median: NA months</span></span>
+<span><span class="co">#&gt; Estimated median: 13.7 months</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">estimated_result</span><span class="op">$</span><span class="va">median_survival</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">relative_error</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">estimated_result</span><span class="op">$</span><span class="va">median_survival</span> <span class="op">-</span> <span class="va">true_median</span><span class="op">)</span> <span class="op">/</span> <span class="va">true_median</span> <span class="op">*</span> <span class="fl">100</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Relative error:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">relative_error</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<span><span class="op">}</span></span>
+<span><span class="co">#&gt; Relative error: 4.2 %</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
