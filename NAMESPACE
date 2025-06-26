@@ -2,8 +2,8 @@
 
 export(extractfromKM)
 export(getMediansurv)
+export(mstfromExpdists)
 export(simPE)
 export(summaryKM)
-export(validate_mimicsurv)
-importFrom(stats,rbinom)
 importFrom(stats,runif)
+importFrom(stats,uniroot)

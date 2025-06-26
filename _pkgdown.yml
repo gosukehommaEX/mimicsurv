@@ -21,18 +21,19 @@ navbar:
   right:
     - icon: fa-github
       href: https://github.com/gosukehommaEX/mimicsurv
+      aria-label: "GitHub repository"
 reference:
   - title: "Main Analysis Functions"
     desc: "Core functions for survival analysis from Kaplan-Meier data"
     contents:
       - extractfromKM
       - getMediansurv
+      - mstfromExpdists
   - title: "Simulation Functions"
-    desc: "Functions for data simulation and validation"
+    desc: "Functions for data simulation and method validation"
     contents:
       - simPE
       - summaryKM
-      - validate_mimicsurv
 articles:
   - title: "Getting Started"
     navbar: ~

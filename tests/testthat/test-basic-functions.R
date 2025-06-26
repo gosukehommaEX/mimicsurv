@@ -150,3 +150,209 @@ test_that("summaryKM input validation works", {
     "must contain 'time' and 'status' columns"
   )
 })
+
+# Tests for mstfromExpdists function
+test_that("mstfromExpdists works with basic two-group input", {
+  # Basic two-group example
+  sample_sizes <- c(100, 150)
+  MST_subgroups <- c(6, 7.5)
+
+  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+
+  # Check structure
+  expect_type(result, "list")
+  expect_true("subgroup_summary" %in% names(result))
+  expect_true("MST_overall" %in% names(result))
+
+  # Check subgroup_summary structure
+  expect_s3_class(result$subgroup_summary, "data.frame")
+  expect_equal(nrow(result$subgroup_summary), 2)
+  expect_equal(ncol(result$subgroup_summary), 3)
+  expect_equal(names(result$subgroup_summary), c("subgroup", "sample_size", "MST"))
+
+  # Check values
+  expect_equal(result$subgroup_summary$sample_size, sample_sizes)
+  expect_equal(result$subgroup_summary$MST, MST_subgroups)
+  expect_equal(result$subgroup_summary$subgroup, c(1, 2))
+
+  # Check MST_overall
+  expect_type(result$MST_overall, "double")
+  expect_length(result$MST_overall, 1)
+  expect_true(is.finite(result$MST_overall))
+  expect_true(result$MST_overall > 0)
+
+  # MST should be between the individual MSTs
+  expect_true(result$MST_overall >= min(MST_subgroups))
+  expect_true(result$MST_overall <= max(MST_subgroups))
+})
+
+test_that("mstfromExpdists works with three-group input", {
+  # Three-group example
+  sample_sizes <- c(200, 300, 100)
+  MST_subgroups <- c(8, 12, 15)
+
+  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+
+  # Check structure
+  expect_equal(nrow(result$subgroup_summary), 3)
+  expect_equal(result$subgroup_summary$sample_size, sample_sizes)
+  expect_equal(result$subgroup_summary$MST, MST_subgroups)
+  expect_equal(result$subgroup_summary$subgroup, c(1, 2, 3))
+
+  # Check MST_overall is reasonable
+  expect_true(result$MST_overall > 0)
+  expect_true(result$MST_overall >= min(MST_subgroups))
+  expect_true(result$MST_overall <= max(MST_subgroups))
+})
+
+test_that("mstfromExpdists handles equal sample sizes correctly", {
+  # Equal sample sizes
+  sample_sizes <- c(100, 100)
+  MST_subgroups <- c(6, 12)
+
+  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+
+  # With equal weights, result should be closer to arithmetic mean than extreme values
+  arithmetic_mean <- mean(MST_subgroups)
+  expect_true(abs(result$MST_overall - arithmetic_mean) < 2)
+})
+
+test_that("mstfromExpdists handles unequal sample sizes correctly", {
+  # Very unequal sample sizes - should be closer to larger group
+  sample_sizes <- c(10, 1000)  # 10:1 ratio
+  MST_subgroups <- c(5, 20)
+
+  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+
+  # Result should be much closer to the MST of the larger group (20)
+  expect_true(result$MST_overall > 15)  # Closer to 20 than to 5
+})
+
+test_that("mstfromExpdists input validation works", {
+  # Test mismatched lengths
+  expect_error(
+    mstfromExpdists(c(100, 150), c(6)),
+    "sample_sizes and MST_subgroups must have the same length"
+  )
+
+  # Test insufficient subgroups
+  expect_error(
+    mstfromExpdists(c(100), c(6)),
+    "At least 2 subgroups are required"
+  )
+
+  # Test negative sample sizes
+  expect_error(
+    mstfromExpdists(c(-100, 150), c(6, 7.5)),
+    "All sample sizes must be positive"
+  )
+
+  # Test zero sample sizes
+  expect_error(
+    mstfromExpdists(c(0, 150), c(6, 7.5)),
+    "All sample sizes must be positive"
+  )
+
+  # Test negative MST values
+  expect_error(
+    mstfromExpdists(c(100, 150), c(-6, 7.5)),
+    "All median survival times must be positive"
+  )
+
+  # Test zero MST values
+  expect_error(
+    mstfromExpdists(c(100, 150), c(0, 7.5)),
+    "All median survival times must be positive"
+  )
+
+  # Test invalid search range
+  expect_error(
+    mstfromExpdists(c(100, 150), c(6, 7.5), search_range = c(10, 5)),
+    "search_range must be a vector of length 2 with search_range\\[1\\] < search_range\\[2\\]"
+  )
+
+  # Test wrong search range length
+  expect_error(
+    mstfromExpdists(c(100, 150), c(6, 7.5), search_range = c(0, 50, 100)),
+    "search_range must be a vector of length 2"
+  )
+})
+
+test_that("mstfromExpdists handles edge cases", {
+  # Very similar MSTs
+  sample_sizes <- c(100, 100)
+  MST_subgroups <- c(10.0, 10.1)
+
+  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+
+  # Result should be very close to both values
+  expect_true(abs(result$MST_overall - 10.05) < 0.1)
+
+  # Single dominant group
+  sample_sizes <- c(1, 10000)
+  MST_subgroups <- c(5, 50)
+
+  result_dominant <- mstfromExpdists(sample_sizes, MST_subgroups)
+
+  # Should be very close to the dominant group's MST
+  expect_true(result_dominant$MST_overall > 45)
+})
+
+test_that("mstfromExpdists handles high MST values with appropriate search range", {
+  # Very high MSTs require larger search range
+  sample_sizes <- c(100, 100)
+  MST_subgroups <- c(80, 120)  # High but reasonable MSTs
+
+  # Should complete without error with extended search range
+  result <- mstfromExpdists(sample_sizes, MST_subgroups, search_range = c(0, 200))
+  expect_true(is.finite(result$MST_overall))
+  expect_true(result$MST_overall > 0)
+  expect_true(result$MST_overall >= min(MST_subgroups))
+  expect_true(result$MST_overall <= max(MST_subgroups))
+})
+
+test_that("mstfromExpdists warns when median is beyond search range", {
+  # Very high MSTs with default search range should warn and return NA
+  sample_sizes <- c(100, 100)
+  MST_subgroups <- c(1000, 2000)  # Very high MSTs
+
+  # Should warn about search range and return NA
+  expect_warning(
+    result <- mstfromExpdists(sample_sizes, MST_subgroups),
+    "Median survival time may be beyond the upper search range"
+  )
+  expect_true(is.na(result$MST_overall))
+})
+
+test_that("mstfromExpdists custom search range works", {
+  sample_sizes <- c(100, 150)
+  MST_subgroups <- c(6, 7.5)
+
+  # Test with custom search range
+  result <- mstfromExpdists(sample_sizes, MST_subgroups, search_range = c(0, 50))
+
+  expect_true(is.finite(result$MST_overall))
+  expect_true(result$MST_overall > 0)
+  expect_true(result$MST_overall < 50)
+})
+
+test_that("mstfromExpdists mathematical correctness", {
+  # Test mathematical properties
+  sample_sizes <- c(300, 200)
+  MST_subgroups <- c(10, 20)
+
+  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+
+  # The result should be different from simple weighted average
+  simple_weighted_avg <- sum(sample_sizes * MST_subgroups) / sum(sample_sizes)
+  expect_false(abs(result$MST_overall - simple_weighted_avg) < 0.001)
+
+  # Should be between min and max
+  expect_true(result$MST_overall > min(MST_subgroups))
+  expect_true(result$MST_overall < max(MST_subgroups))
+
+  # Should be closer to the group with larger sample size
+  # Group 1 has 300 samples with MST=10, Group 2 has 200 samples with MST=20
+  # Result should be closer to 10 than to 20
+  expect_true(abs(result$MST_overall - 10) < abs(result$MST_overall - 20))
+})

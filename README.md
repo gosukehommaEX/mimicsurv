@@ -1,18 +1,16 @@
-# mimicsurv <img src="man/figures/mimicsurv_sticker.png" align="right" height="139" />
+# mimicsurv <img src="man/figures/mimicsurv_sticker.png" align="right" height="120" alt="mimicsurv logo" />
 
 > Extract Survival Analysis Results from Kaplan-Meier Tables Using Person-Years Method
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/gosukehommaEX/mimicsurv/workflows/R-CMD-check/badge.svg)](https://github.com/gosukehommaEX/mimicsurv/actions)
-[![CRAN status](https://www.r-pkg.org/badges/version/mimicsurv)](https://CRAN.R-project.org/package=mimicsurv)
-[![Codecov test coverage](https://codecov.io/gh/gosukehommaEX/mimicsurv/branch/main/graph/badge.svg)](https://codecov.io/gh/gosukehommaEX/mimicsurv?branch=main)
 <!-- badges: end -->
 
 ## Overview
 
 The `mimicsurv` package provides tools for survival analysis from published Kaplan-Meier tables using the person-years method. This package enables researchers to extract quantitative survival analysis results from published studies when individual patient data is not available.
 
-It also includes simulation functions for validation of the estimation methods.
+It also includes simulation functions for method validation and support for mixed exponential distribution analysis.
 
 ## Documentation
 
@@ -51,11 +49,14 @@ This package requires the following R packages:
 - **Extract survival metrics** from published Kaplan-Meier curves
 - **Estimate hazard rates** using the person-years method  
 - **Calculate median survival times** when not explicitly reported
-- **Validate methodology** with simulation functions
+- **Mixed exponential distribution analysis** for combining multiple subgroups
+- **Simulation functions** for method validation
 - **Real-world examples** including KEYNOTE-859 clinical trial analysis
 - **Enable meta-analyses** and comparative effectiveness research
 
 ## Quick Example
+
+### Basic Survival Analysis from Kaplan-Meier Tables
 
 ```r
 library(mimicsurv)
@@ -73,6 +74,29 @@ print(result$hazard_table)
 cat("Median survival time:", result$median_survival, "months")
 ```
 
+### Mixed Exponential Distribution Analysis
+
+```r
+# Calculate overall median survival time from multiple subgroups
+sample_sizes <- c(100, 150)  # Sample sizes for each subgroup
+MST_subgroups <- c(6, 7.5)   # Median survival times for each subgroup
+
+# Calculate overall median survival time
+result_mixed <- mstfromExpdists(sample_sizes, MST_subgroups)
+
+# View results
+print(result_mixed$subgroup_summary)
+print(paste("Overall MST:", round(result_mixed$MST_overall, 2), "months"))
+```
+
+## Core Functions
+
+- **`extractfromKM()`**: Extract survival analysis results from Kaplan-Meier tables
+- **`mstfromExpdists()`**: Calculate overall median survival time from mixed exponential distributions
+- **`simPE()`**: Simulate survival data from piecewise exponential distributions
+- **`summaryKM()`**: Create Kaplan-Meier style summary tables from simulated data
+- **`getMediansurv()`**: Calculate median survival time from piecewise exponential parameters
+
 ## Methodology
 
 The package implements the person-years method for hazard estimation based on the following assumptions:
@@ -80,6 +104,9 @@ The package implements the person-years method for hazard estimation based on th
 - **Piecewise exponential survival** within each time interval
 - **Non-informative censoring** independent of the event process  
 - **Uniform distribution** of events and censoring within intervals
+
+For mixed exponential distributions, the package uses numerical methods to solve:
+$$S(t) = \sum_{j=1}^{k} p_j \exp(-\lambda_j t) = 0.5$$
 
 For detailed mathematical background, see the [Getting Started vignette](https://gosukehommaEX.github.io/mimicsurv/articles/getting-started.html).
 
@@ -90,6 +117,7 @@ For detailed mathematical background, see the [Getting Started vignette](https:/
 - **Health technology assessment**
 - **Clinical trial re-analysis** and validation
 - **Academic research** when individual patient data (IPD) is unavailable
+- **Combining survival data** from multiple subgroups with different characteristics
 
 ## Real-World Applications
 
