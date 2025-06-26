@@ -40,7 +40,7 @@
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/gosukehommaEX/mimicsurv"><span class="fa fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/gosukehommaEX/mimicsurv" aria-label="GitHub repository"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -122,6 +122,112 @@ interval</li>
 <strong>hazard_rate</strong>: Estimated hazard rate (events per
 person-time)</li>
 </ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="mixed-exponential-distributions">Mixed Exponential Distributions<a class="anchor" aria-label="anchor" href="#mixed-exponential-distributions"></a>
+</h2>
+<div class="section level3">
+<h3 id="calculating-overall-median-survival-time-from-multiple-subgroups">Calculating Overall Median Survival Time from Multiple
+Subgroups<a class="anchor" aria-label="anchor" href="#calculating-overall-median-survival-time-from-multiple-subgroups"></a>
+</h3>
+<p>The <code><a href="../reference/mstfromExpdists.html">mstfromExpdists()</a></code> function calculates the overall
+median survival time for a mixed population composed of multiple
+subgroups, each following exponential distributions:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Example: Two biomarker subgroups</span></span>
+<span><span class="va">sample_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">150</span><span class="op">)</span></span>
+<span><span class="va">MST_subgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">7.5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">result_mixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mstfromExpdists.html">mstfromExpdists</a></span><span class="op">(</span><span class="va">sample_sizes</span>, <span class="va">MST_subgroups</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View subgroup summary</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result_mixed</span><span class="op">$</span><span class="va">subgroup_summary</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   subgroup sample_size MST</span></span>
+<span><span class="co">#&gt; 1        1         100 6.0</span></span>
+<span><span class="co">#&gt; 2        2         150 7.5</span></span>
+<span></span>
+<span><span class="co"># View overall median survival time</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Overall MST:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">result_mixed</span><span class="op">$</span><span class="va">MST_overall</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Overall MST: 6.85 months</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="understanding-mixed-exponential-distributions">Understanding Mixed Exponential Distributions<a class="anchor" aria-label="anchor" href="#understanding-mixed-exponential-distributions"></a>
+</h3>
+<p>When analyzing survival data from multiple subgroups that each follow
+exponential distributions, the overall population follows a
+<strong>mixture of exponential distributions</strong>.</p>
+<div class="section level4">
+<h4 id="mathematical-foundation">Mathematical Foundation<a class="anchor" aria-label="anchor" href="#mathematical-foundation"></a>
+</h4>
+<p>For a population composed of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+subgroups, the overall survival function is:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><msub><mi>p</mi><mi>j</mi></msub><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><msub><mi>λ</mi><mi>j</mi></msub><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">S(t) = \sum_{j=1}^{k} p_j \exp(-\lambda_j t)</annotation></semantics></math></p>
+<p>where: -
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>j</mi></msub><mo>=</mo><mfrac><msub><mi>n</mi><mi>j</mi></msub><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></msubsup><msub><mi>n</mi><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">p_j = \frac{n_j}{\sum_{i=1}^{k} n_i}</annotation></semantics></math>
+is the mixing probability for subgroup
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+-
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mi>j</mi></msub><mo>=</mo><mfrac><mrow><mo>ln</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><msub><mtext mathvariant="normal">MST</mtext><mi>j</mi></msub></mfrac></mrow><annotation encoding="application/x-tex">\lambda_j = \frac{\ln(2)}{\text{MST}_j}</annotation></semantics></math>
+is the hazard rate for subgroup
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+-
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mi>j</mi></msub><annotation encoding="application/x-tex">n_j</annotation></semantics></math>
+is the sample size of subgroup
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+-
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mtext mathvariant="normal">MST</mtext><mi>j</mi></msub><annotation encoding="application/x-tex">\text{MST}_j</annotation></semantics></math>
+is the median survival time for subgroup
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math></p>
+</div>
+<div class="section level4">
+<h4 id="median-survival-time-calculation">Median Survival Time Calculation<a class="anchor" aria-label="anchor" href="#median-survival-time-calculation"></a>
+</h4>
+<p>The overall median survival time is found by solving:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mrow><mi>m</mi><mi>e</mi><mi>d</mi><mi>i</mi><mi>a</mi><mi>n</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">S(t_{median}) = 0.5</annotation></semantics></math></p>
+<p>This requires numerical methods since the equation:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><msub><mi>p</mi><mi>j</mi></msub><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><msub><mi>λ</mi><mi>j</mi></msub><msub><mi>t</mi><mrow><mi>m</mi><mi>e</mi><mi>d</mi><mi>i</mi><mi>a</mi><mi>n</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\sum_{j=1}^{k} p_j \exp(-\lambda_j t_{median}) = 0.5</annotation></semantics></math></p>
+<p>cannot be solved analytically for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>m</mi><mi>e</mi><mi>d</mi><mi>i</mi><mi>a</mi><mi>n</mi></mrow></msub><annotation encoding="application/x-tex">t_{median}</annotation></semantics></math>
+when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>&gt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k &gt; 1</annotation></semantics></math>.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="three-subgroup-example">Three Subgroup Example<a class="anchor" aria-label="anchor" href="#three-subgroup-example"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Example: Three treatment subgroups</span></span>
+<span><span class="va">sample_sizes_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">300</span>, <span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">MST_subgroups_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">12</span>, <span class="fl">15</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">result_3groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mstfromExpdists.html">mstfromExpdists</a></span><span class="op">(</span><span class="va">sample_sizes_3</span>, <span class="va">MST_subgroups_3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result_3groups</span><span class="op">$</span><span class="va">subgroup_summary</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   subgroup sample_size MST</span></span>
+<span><span class="co">#&gt; 1        1         200   8</span></span>
+<span><span class="co">#&gt; 2        2         300  12</span></span>
+<span><span class="co">#&gt; 3        3         100  15</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Overall MST:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">result_3groups</span><span class="op">$</span><span class="va">MST_overall</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Overall MST: 10.8 months</span></span>
+<span></span>
+<span><span class="co"># Compare with simple weighted average (incorrect method)</span></span>
+<span><span class="va">weighted_avg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sample_sizes_3</span> <span class="op">*</span> <span class="va">MST_subgroups_3</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sample_sizes_3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Simple weighted average:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">weighted_avg</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Simple weighted average: 11.17 months</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Difference:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">result_3groups</span><span class="op">$</span><span class="va">MST_overall</span> <span class="op">-</span> <span class="va">weighted_avg</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Difference: 0.37 months</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="why-simple-weighted-average-is-incorrect">Why Simple Weighted Average is Incorrect<a class="anchor" aria-label="anchor" href="#why-simple-weighted-average-is-incorrect"></a>
+</h3>
+<p>The median is a <strong>non-linear statistic</strong>, and for
+mixture distributions:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">Median</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mi>X</mi><mo>+</mo><mi>b</mi><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≠</mo><mi>a</mi><mo>⋅</mo><mtext mathvariant="normal">Median</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>b</mi><mo>⋅</mo><mtext mathvariant="normal">Median</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{Median}(aX + bY) \neq a \cdot \text{Median}(X) + b \cdot \text{Median}(Y)</annotation></semantics></math></p>
+<p>The correct approach requires solving the survival equation
+numerically, as implemented in <code><a href="../reference/mstfromExpdists.html">mstfromExpdists()</a></code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -219,48 +325,72 @@ contribute:</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><mo>∼</mo><mtext mathvariant="normal">Uniform</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>Δ</mi><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">U \sim \text{Uniform}(0, \Delta t)</annotation></semantics></math>
 represents the time from interval start to event/censoring, then:
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>U</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><mfrac><mrow><mn>0</mn><mo>+</mo><mi>Δ</mi><mi>t</mi></mrow><mn>2</mn></mfrac><mo>=</mo><mfrac><mrow><mi>Δ</mi><mi>t</mi></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">E[U] = \frac{0 + \Delta t}{2} = \frac{\Delta t}{2}</annotation></semantics></math></p>
-<p>We multiply by
+<p>This is why we multiply by
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mfrac><mrow><mi>Δ</mi><mi>t</mi></mrow><mn>2</mn></mfrac><annotation encoding="application/x-tex">\frac{\Delta t}{2}</annotation></semantics></math>
-rather than a fraction.</p>
+rather than some other fraction.</p>
 </div>
 <div class="section level4">
 <h4 id="trapezoidal-rule-implementation">Trapezoidal Rule Implementation<a class="anchor" aria-label="anchor" href="#trapezoidal-rule-implementation"></a>
 </h4>
-<p>Combining these components yields the trapezoidal rule:
+<p>Combining both contributions:
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mtext mathvariant="normal">Person-time</mtext><mi>i</mi></msub><mo>=</mo><msub><mi>n</mi><mrow><mtext mathvariant="normal">risk</mtext><mo>,</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>×</mo><mi>Δ</mi><mi>t</mi><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mrow><mtext mathvariant="normal">risk</mtext><mo>,</mo><mi>i</mi></mrow></msub><mo>−</mo><msub><mi>n</mi><mrow><mtext mathvariant="normal">risk</mtext><mo>,</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>×</mo><mfrac><mrow><mi>Δ</mi><mi>t</mi></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\text{Person-time}_i = n_{\text{risk}, i+1} \times \Delta t + (n_{\text{risk}, i} - n_{\text{risk}, i+1}) \times \frac{\Delta t}{2}</annotation></semantics></math></p>
 <p>Simplifying:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mtext mathvariant="normal">Person-time</mtext><mi>i</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>n</mi><mrow><mtext mathvariant="normal">risk</mtext><mo>,</mo><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>n</mi><mrow><mtext mathvariant="normal">risk</mtext><mo>,</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub></mrow><mn>2</mn></mfrac><mo>×</mo><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\text{Person-time}_i = \frac{n_{\text{risk}, i} + n_{\text{risk}, i+1}}{2} \times \Delta t</annotation></semantics></math></p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mtext mathvariant="normal">Person-time</mtext><mi>i</mi></msub><mo>=</mo><mfrac><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>n</mi><mrow><mtext mathvariant="normal">risk</mtext><mo>,</mo><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>n</mi><mrow><mtext mathvariant="normal">risk</mtext><mo>,</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>×</mo><mi>Δ</mi><mi>t</mi></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\text{Person-time}_i = \frac{(n_{\text{risk}, i} + n_{\text{risk}, i+1}) \times \Delta t}{2}</annotation></semantics></math></p>
+<p>This is the <strong>trapezoidal rule</strong> for numerical
+integration.</p>
 </div>
 </div>
 <div class="section level3">
 <h3 id="hazard-rate-estimation">Hazard Rate Estimation<a class="anchor" aria-label="anchor" href="#hazard-rate-estimation"></a>
 </h3>
-<p>Hazard rates are estimated as:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mi>i</mi></msub><mo>=</mo><mfrac><msub><mtext mathvariant="normal">Number of events</mtext><mi>i</mi></msub><msub><mtext mathvariant="normal">Person-time</mtext><mi>i</mi></msub></mfrac></mrow><annotation encoding="application/x-tex">\lambda_i = \frac{\text{Number of events}_i}{\text{Person-time}_i}</annotation></semantics></math></p>
+<p>Once person-time is calculated, the hazard rate for interval
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+is estimated as:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>λ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>=</mo><mfrac><msub><mi>n</mi><mrow><mtext mathvariant="normal">events</mtext><mo>,</mo><mi>i</mi></mrow></msub><msub><mtext mathvariant="normal">Person-time</mtext><mi>i</mi></msub></mfrac></mrow><annotation encoding="application/x-tex">\hat{\lambda}_i = \frac{n_{\text{events}, i}}{\text{Person-time}_i}</annotation></semantics></math></p>
 </div>
 <div class="section level3">
-<h3 id="median-survival-time">Median Survival Time<a class="anchor" aria-label="anchor" href="#median-survival-time"></a>
+<h3 id="event-calculation">Event Calculation<a class="anchor" aria-label="anchor" href="#event-calculation"></a>
 </h3>
-<p>For piecewise exponential survival, the median is found where:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><msub><mi>λ</mi><mi>j</mi></msub><mi>Δ</mi><msub><mi>t</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">S(t) = \exp\left(-\sum_{j=1}^{k} \lambda_j \Delta t_j\right) = 0.5</annotation></semantics></math></p>
+<p>The number of events in interval
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+is estimated as:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>n</mi><mrow><mtext mathvariant="normal">events</mtext><mo>,</mo><mi>i</mi></mrow></msub><mo>=</mo><msub><mi>n</mi><mrow><mtext mathvariant="normal">risk</mtext><mo>,</mo><mi>i</mi></mrow></msub><mo>−</mo><msub><mi>n</mi><mrow><mtext mathvariant="normal">risk</mtext><mo>,</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>−</mo><msub><mi>n</mi><mrow><mtext mathvariant="normal">censored</mtext><mo>,</mo><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">n_{\text{events}, i} = n_{\text{risk}, i} - n_{\text{risk}, i+1} - n_{\text{censored}, i}</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mrow><mtext mathvariant="normal">censored</mtext><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">n_{\text{censored}, i}</annotation></semantics></math>
+is the number of individuals censored during interval
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>.</p>
+</div>
+<div class="section level3">
+<h3 id="median-survival-time-calculation-1">Median Survival Time Calculation<a class="anchor" aria-label="anchor" href="#median-survival-time-calculation-1"></a>
+</h3>
+<p>For piecewise exponential survival, the median is found by solving:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mtext mathvariant="normal">median</mtext></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">S(t_{\text{median}}) = 0.5</annotation></semantics></math></p>
+<p>where:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><msub><mi>λ</mi><mi>j</mi></msub><mi>Δ</mi><msub><mi>t</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mi>t</mi><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> in interval </mtext><mspace width="0.333em"></mspace></mrow><mi>k</mi><mo>+</mo><mn>1</mn></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><msub><mi>λ</mi><mi>k</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo>−</mo><msub><mi>t</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mi>t</mi><mo>∈</mo><mo stretchy="false" form="prefix">[</mo><msub><mi>t</mi><mi>k</mi></msub><mo>,</mo><msub><mi>t</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">S(t) = \begin{cases}
+\exp\left(-\sum_{j=1}^{k} \lambda_j \Delta t_j\right) &amp; \text{if } t \text{ in interval } k+1 \\
+S(t_k) \exp(-\lambda_k (t - t_k)) &amp; \text{if } t \in [t_k, t_{k+1})
+\end{cases}</annotation></semantics></math></p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="simulation-and-validation">Simulation and Validation<a class="anchor" aria-label="anchor" href="#simulation-and-validation"></a>
+<h2 id="simulation-studies">Simulation Studies<a class="anchor" aria-label="anchor" href="#simulation-studies"></a>
 </h2>
 <div class="section level3">
-<h3 id="generating-simulated-data">Generating Simulated Data<a class="anchor" aria-label="anchor" href="#generating-simulated-data"></a>
+<h3 id="data-generation">Data Generation<a class="anchor" aria-label="anchor" href="#data-generation"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Define piecewise exponential parameters</span></span>
-<span><span class="va">time_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span><span class="op">)</span></span>
-<span><span class="va">hazard_rates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span><span class="op">)</span></span>
+<p>The <code><a href="../reference/simPE.html">simPE()</a></code> function generates survival data from
+piecewise exponential distributions:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Define true parameters</span></span>
+<span><span class="va">true_time_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span><span class="op">)</span></span>
+<span><span class="va">true_hazard_rates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Simulate survival data with seed for reproducibility</span></span>
+<span><span class="co"># Generate simulated data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">100</span>,  <span class="co"># Reduced sample size for faster execution</span></span>
-<span>  time_points <span class="op">=</span> <span class="va">time_points</span>,</span>
-<span>  hazard_rates <span class="op">=</span> <span class="va">hazard_rates</span>,</span>
+<span>  time_points <span class="op">=</span> <span class="va">true_time_points</span>,</span>
+<span>  hazard_rates <span class="op">=</span> <span class="va">true_hazard_rates</span>,</span>
 <span>  max_time <span class="op">=</span> <span class="fl">24</span>,</span>
 <span>  censoring_prob <span class="op">=</span> <span class="fl">0.1</span>,  <span class="co"># Reduced censoring probability</span></span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span>  <span class="co"># For reproducible results</span></span>
@@ -293,9 +423,9 @@ rather than a fraction.</p>
 <div class="section level3">
 <h3 id="creating-summary-tables">Creating Summary Tables<a class="anchor" aria-label="anchor" href="#creating-summary-tables"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create Kaplan-Meier style summary</span></span>
-<span><span class="va">km_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summaryKM.html">summaryKM</a></span><span class="op">(</span><span class="va">sim_data</span>, <span class="va">time_points</span><span class="op">)</span></span>
+<span><span class="va">km_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summaryKM.html">summaryKM</a></span><span class="op">(</span><span class="va">sim_data</span>, <span class="va">true_time_points</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Number at risk at each time point:"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Number at risk at each time point:"</span></span>
@@ -309,190 +439,116 @@ rather than a fraction.</p>
 <span></span>
 <span><span class="co"># Create comparison table</span></span>
 <span><span class="va">comparison_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Time <span class="op">=</span> <span class="va">time_points</span>,</span>
-<span>  N_Risk <span class="op">=</span> <span class="va">km_summary</span><span class="op">$</span><span class="va">n_risk</span>,</span>
-<span>  N_Censored_Cumulative <span class="op">=</span> <span class="va">km_summary</span><span class="op">$</span><span class="va">n_censored_cumulative</span></span>
+<span>  Time <span class="op">=</span> <span class="va">true_time_points</span>,</span>
+<span>  True_n_risk <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">75</span>, <span class="fl">50</span>, <span class="fl">25</span>, <span class="fl">10</span><span class="op">)</span>,  <span class="co"># Hypothetical true values</span></span>
+<span>  Simulated_n_risk <span class="op">=</span> <span class="va">km_summary</span><span class="op">$</span><span class="va">n_risk</span>,</span>
+<span>  Difference <span class="op">=</span> <span class="va">km_summary</span><span class="op">$</span><span class="va">n_risk</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">75</span>, <span class="fl">50</span>, <span class="fl">25</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Summary table:"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Summary table:"</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Comparison of simulated vs. expected values:"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Comparison of simulated vs. expected values:"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_table</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Time N_Risk N_Censored_Cumulative</span></span>
-<span><span class="co">#&gt; 1    0    100                     0</span></span>
-<span><span class="co">#&gt; 2    6     71                     2</span></span>
-<span><span class="co">#&gt; 3   12     49                     2</span></span>
-<span><span class="co">#&gt; 4   18     20                     4</span></span>
-<span><span class="co">#&gt; 5   24      5                     4</span></span></code></pre></div>
+<span><span class="co">#&gt;   Time True_n_risk Simulated_n_risk Difference</span></span>
+<span><span class="co">#&gt; 1    0         100              100          0</span></span>
+<span><span class="co">#&gt; 2    6          75               71         -4</span></span>
+<span><span class="co">#&gt; 3   12          50               49         -1</span></span>
+<span><span class="co">#&gt; 4   18          25               20         -5</span></span>
+<span><span class="co">#&gt; 5   24          10                5         -5</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="method-validation-example">Method Validation Example<a class="anchor" aria-label="anchor" href="#method-validation-example"></a>
+<h3 id="reproducibility">Reproducibility<a class="anchor" aria-label="anchor" href="#reproducibility"></a>
 </h3>
-<p>Here’s a practical example showing how well our method recovers known
-parameters:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Set known "true" parameters similar to our study</span></span>
-<span><span class="va">true_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span><span class="op">)</span></span>
-<span><span class="va">true_hazards</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Generate larger sample for more stable estimates</span></span>
-<span><span class="va">large_sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span></span>
-<span>  n <span class="op">=</span> <span class="fl">1000</span>,  <span class="co"># Larger sample for better precision</span></span>
-<span>  time_points <span class="op">=</span> <span class="va">true_times</span>,</span>
-<span>  hazard_rates <span class="op">=</span> <span class="va">true_hazards</span>,</span>
-<span>  max_time <span class="op">=</span> <span class="fl">24</span>,</span>
-<span>  censoring_prob <span class="op">=</span> <span class="fl">0.15</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">2024</span>  <span class="co"># For reproducible results</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create KM table from simulated data</span></span>
-<span><span class="va">large_km_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summaryKM.html">summaryKM</a></span><span class="op">(</span><span class="va">large_sim_data</span>, <span class="va">true_times</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Large simulation summary:"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Large simulation summary:"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Time <span class="op">=</span> <span class="va">true_times</span>,</span>
-<span>  N_Risk <span class="op">=</span> <span class="va">large_km_table</span><span class="op">$</span><span class="va">n_risk</span>,</span>
-<span>  N_Censored <span class="op">=</span> <span class="va">large_km_table</span><span class="op">$</span><span class="va">n_censored_cumulative</span></span>
-<span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Time N_Risk N_Censored</span></span>
-<span><span class="co">#&gt; 1    0   1000          0</span></span>
-<span><span class="co">#&gt; 2    6    705         34</span></span>
-<span><span class="co">#&gt; 3   12    397         54</span></span>
-<span><span class="co">#&gt; 4   18    183         67</span></span>
-<span><span class="co">#&gt; 5   24     80         69</span></span>
-<span></span>
-<span><span class="co"># Estimate parameters from the KM table</span></span>
-<span><span class="va">estimated_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span></span>
-<span>  time_points <span class="op">=</span> <span class="va">true_times</span>,</span>
-<span>  n_risk <span class="op">=</span> <span class="va">large_km_table</span><span class="op">$</span><span class="va">n_risk</span>,</span>
-<span>  n_censored <span class="op">=</span> <span class="va">large_km_table</span><span class="op">$</span><span class="va">n_censored_cumulative</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Estimated hazard table:"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Estimated hazard table:"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">estimated_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   interval n_at_risk_start n_censored_interval n_events hazard_rate</span></span>
-<span><span class="co">#&gt; 1    [0,6)            1000                  34      261  0.05102639</span></span>
-<span><span class="co">#&gt; 2   [6,12)             705                  20      288  0.08711434</span></span>
-<span><span class="co">#&gt; 3  [12,18)             397                  13      201  0.11551724</span></span>
-<span><span class="co">#&gt; 4  [18,24)             183                   2      101  0.12801014</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Estimated median survival:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">estimated_result</span><span class="op">$</span><span class="va">median_survival</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Estimated median survival: 10.44 months"</span></span>
-<span></span>
-<span><span class="co"># Validate the method by comparing with original parameters</span></span>
-<span><span class="va">hazard_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Interval <span class="op">=</span> <span class="va">estimated_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">interval</span>,</span>
-<span>  True_Hazard <span class="op">=</span> <span class="va">true_hazards</span>,</span>
-<span>  Estimated_Hazard <span class="op">=</span> <span class="va">estimated_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">hazard_rate</span>,</span>
-<span>  Relative_Error <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">estimated_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">hazard_rate</span> <span class="op">-</span> <span class="va">true_hazards</span><span class="op">)</span> <span class="op">/</span> </span>
-<span>                   <span class="va">true_hazards</span> <span class="op">*</span> <span class="fl">100</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Hazard rate comparison:"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Hazard rate comparison:"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">hazard_comparison</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Interval True_Hazard Estimated_Hazard Relative_Error</span></span>
-<span><span class="co">#&gt; 1    [0,6)        0.05       0.05102639       2.052786</span></span>
-<span><span class="co">#&gt; 2   [6,12)        0.08       0.08711434       8.892922</span></span>
-<span><span class="co">#&gt; 3  [12,18)        0.12       0.11551724       3.735632</span></span>
-<span><span class="co">#&gt; 4  [18,24)        0.15       0.12801014      14.659907</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"The method successfully recovers the true hazard rates with relative errors of 2-11%,\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; The method successfully recovers the true hazard rates with relative errors of 2-11%,</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"demonstrating good accuracy for practical applications.\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; demonstrating good accuracy for practical applications.</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="reproducibility-demonstration">Reproducibility Demonstration<a class="anchor" aria-label="anchor" href="#reproducibility-demonstration"></a>
-</h3>
-<p>One key feature of the updated <code><a href="../reference/simPE.html">simPE()</a></code> function is the
-ability to generate reproducible results:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Test reproducibility with same seed</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span>  <span class="co"># Clear any existing seed</span></span>
-<span></span>
-<span><span class="va">sim1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span>, <span class="va">time_points</span>, <span class="va">hazard_rates</span>, <span class="fl">24</span>, seed <span class="op">=</span> <span class="fl">456</span><span class="op">)</span></span>
-<span><span class="va">sim2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span>, <span class="va">time_points</span>, <span class="va">hazard_rates</span>, <span class="fl">24</span>, seed <span class="op">=</span> <span class="fl">456</span><span class="op">)</span></span>
+<p>The simulation functions support seed specification for reproducible
+results:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Demonstrate reproducibility with seeds</span></span>
+<span><span class="va">sim1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, time_points <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">12</span>, <span class="fl">24</span><span class="op">)</span>, </span>
+<span>              hazard_rates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span><span class="op">)</span>, max_time <span class="op">=</span> <span class="fl">24</span>, seed <span class="op">=</span> <span class="fl">456</span><span class="op">)</span></span>
+<span><span class="va">sim2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, time_points <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">12</span>, <span class="fl">24</span><span class="op">)</span>, </span>
+<span>              hazard_rates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span><span class="op">)</span>, max_time <span class="op">=</span> <span class="fl">24</span>, seed <span class="op">=</span> <span class="fl">456</span><span class="op">)</span></span>
+<span><span class="va">sim3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, time_points <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">12</span>, <span class="fl">24</span><span class="op">)</span>, </span>
+<span>              hazard_rates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span><span class="op">)</span>, max_time <span class="op">=</span> <span class="fl">24</span>, seed <span class="op">=</span> <span class="fl">789</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"First simulation (first 5 rows):"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "First simulation (first 5 rows):"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sim1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        time status</span></span>
-<span><span class="co">#&gt; 1 24.000000      1</span></span>
-<span><span class="co">#&gt; 2 18.388074      1</span></span>
-<span><span class="co">#&gt; 3  6.133383      1</span></span>
-<span><span class="co">#&gt; 4  3.200241      1</span></span>
-<span><span class="co">#&gt; 5  4.755047      1</span></span>
+<span><span class="co">#&gt; 1 18.064701      1</span></span>
+<span><span class="co">#&gt; 2 13.791056      1</span></span>
+<span><span class="co">#&gt; 3  3.106706      1</span></span>
+<span><span class="co">#&gt; 4  1.600120      1</span></span>
+<span><span class="co">#&gt; 5  2.377524      1</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Second simulation (first 5 rows):"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Second simulation (first 5 rows):"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sim2</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        time status</span></span>
-<span><span class="co">#&gt; 1 24.000000      1</span></span>
-<span><span class="co">#&gt; 2 18.388074      1</span></span>
-<span><span class="co">#&gt; 3  6.133383      1</span></span>
-<span><span class="co">#&gt; 4  3.200241      1</span></span>
-<span><span class="co">#&gt; 5  4.755047      1</span></span>
+<span><span class="co">#&gt; 1 18.064701      1</span></span>
+<span><span class="co">#&gt; 2 13.791056      1</span></span>
+<span><span class="co">#&gt; 3  3.106706      1</span></span>
+<span><span class="co">#&gt; 4  1.600120      1</span></span>
+<span><span class="co">#&gt; 5  2.377524      1</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Are the simulations identical?"</span>, <span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">sim1</span>, <span class="va">sim2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Are the simulations identical? TRUE"</span></span>
-<span></span>
-<span><span class="co"># Test different seeds produce different results</span></span>
-<span><span class="va">sim3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">50</span>, <span class="va">time_points</span>, <span class="va">hazard_rates</span>, <span class="fl">24</span>, seed <span class="op">=</span> <span class="fl">789</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Are sim1 and sim3 different?"</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">sim1</span>, <span class="va">sim3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Are sim1 and sim3 different? TRUE"</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="validation-study">Validation Study<a class="anchor" aria-label="anchor" href="#validation-study"></a>
+<h2 id="method-comparison">Method Comparison<a class="anchor" aria-label="anchor" href="#method-comparison"></a>
 </h2>
 <div class="section level3">
-<h3 id="comprehensive-validation">Comprehensive Validation<a class="anchor" aria-label="anchor" href="#comprehensive-validation"></a>
+<h3 id="simulated-vs--published-data">Simulated vs. Published Data<a class="anchor" aria-label="anchor" href="#simulated-vs--published-data"></a>
 </h3>
-<p>The <code><a href="../reference/validate_mimicsurv.html">validate_mimicsurv()</a></code> function provides comprehensive
-validation of the hazard estimation methods:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Run validation study (small example for demonstration)</span></span>
-<span><span class="co"># Note: This is computationally intensive, so we set eval=FALSE for the vignette</span></span>
-<span><span class="va">validation_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate_mimicsurv.html">validate_mimicsurv</a></span><span class="op">(</span></span>
-<span>  true_time_points <span class="op">=</span> <span class="va">time_points</span>,</span>
-<span>  true_hazard_rates <span class="op">=</span> <span class="va">hazard_rates</span>,</span>
-<span>  sample_sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">200</span><span class="op">)</span>,</span>
-<span>  n_simulations <span class="op">=</span> <span class="fl">50</span>,</span>
-<span>  censoring_prob <span class="op">=</span> <span class="fl">0.15</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">1001</span>  <span class="co"># For reproducible validation</span></span>
+<p>We can compare our method performance on both simulated and published
+data:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Apply our method to simulated data</span></span>
+<span><span class="va">sim_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span></span>
+<span>  time_points <span class="op">=</span> <span class="va">true_time_points</span>,</span>
+<span>  n_risk <span class="op">=</span> <span class="va">km_summary</span><span class="op">$</span><span class="va">n_risk</span>,</span>
+<span>  n_censored <span class="op">=</span> <span class="va">km_summary</span><span class="op">$</span><span class="va">n_censored_cumulative</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># View summary statistics</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">validation_result</span><span class="op">$</span><span class="va">summary_statistics</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Analysis of simulated data:"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Analysis of simulated data:"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sim_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   interval n_at_risk_start n_censored_interval n_events hazard_rate</span></span>
+<span><span class="co">#&gt; 1    [0,6)             100                   2       27  0.05263158</span></span>
+<span><span class="co">#&gt; 2   [6,12)              71                   0       22  0.06111111</span></span>
+<span><span class="co">#&gt; 3  [12,18)              49                   2       27  0.13043478</span></span>
+<span><span class="co">#&gt; 4  [18,24)              20                   0       15  0.20000000</span></span>
 <span></span>
-<span><span class="co"># View detailed results for one sample size</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">validation_result</span><span class="op">$</span><span class="va">detailed_results</span><span class="op">$</span><span class="va">n_200</span><span class="op">$</span><span class="va">hazard_results</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Compare estimated vs. true hazard rates</span></span>
+<span><span class="va">comparison_hazards</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Interval <span class="op">=</span> <span class="va">sim_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">interval</span>,</span>
+<span>  True_Hazard <span class="op">=</span> <span class="va">true_hazard_rates</span>,</span>
+<span>  Estimated_Hazard <span class="op">=</span> <span class="va">sim_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">hazard_rate</span>,</span>
+<span>  Relative_Error <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">sim_result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">$</span><span class="va">hazard_rate</span> <span class="op">-</span> <span class="va">true_hazard_rates</span><span class="op">)</span> <span class="op">/</span> <span class="va">true_hazard_rates</span> <span class="op">*</span> <span class="fl">100</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Hazard rate comparison:"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Hazard rate comparison:"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison_hazards</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Interval True_Hazard Estimated_Hazard Relative_Error</span></span>
+<span><span class="co">#&gt; 1    [0,6)        0.05       0.05263158       5.263158</span></span>
+<span><span class="co">#&gt; 2   [6,12)        0.08       0.06111111      23.611111</span></span>
+<span><span class="co">#&gt; 3  [12,18)        0.12       0.13043478       8.695652</span></span>
+<span><span class="co">#&gt; 4  [18,24)        0.15       0.20000000      33.333333</span></span>
+<span></span>
+<span><span class="co"># Calculate true median survival time</span></span>
+<span><span class="va">true_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getMediansurv.html">getMediansurv</a></span><span class="op">(</span><span class="va">true_time_points</span>, <span class="va">true_hazard_rates</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"True median survival:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">true_median</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "True median survival: 10.91 months"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Estimated median survival:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">sim_result</span><span class="op">$</span><span class="va">median_survival</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Estimated median survival: 12.08 months"</span></span></code></pre></div>
 </div>
-</div>
-<div class="section level2">
-<h2 id="practical-applications">Practical Applications<a class="anchor" aria-label="anchor" href="#practical-applications"></a>
-</h2>
 <div class="section level3">
-<h3 id="working-with-published-data">Working with Published Data<a class="anchor" aria-label="anchor" href="#working-with-published-data"></a>
+<h3 id="analysis-of-published-data">Analysis of Published Data<a class="anchor" aria-label="anchor" href="#analysis-of-published-data"></a>
 </h3>
-<p>When working with published Kaplan-Meier tables, follow these
-steps:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Extract time points</strong> from the published figure or
-table</li>
-<li>
-<strong>Read number at risk</strong> at each time point</li>
-<li>
-<strong>Calculate cumulative censoring</strong> if not directly
-provided</li>
-<li>
-<strong>Apply <code><a href="../reference/extractfromKM.html">extractfromKM()</a></code></strong> to estimate
-hazard rates</li>
-</ol>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example with realistic published data</span></span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Compare our method with published Kaplan-Meier data</span></span>
 <span><span class="va">published_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">15</span>, <span class="fl">18</span>, <span class="fl">21</span>, <span class="fl">24</span><span class="op">)</span></span>
 <span><span class="va">published_n_risk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">180</span>, <span class="fl">165</span>, <span class="fl">145</span>, <span class="fl">128</span>, <span class="fl">110</span>, <span class="fl">95</span>, <span class="fl">78</span>, <span class="fl">65</span>, <span class="fl">50</span><span class="op">)</span></span>
 <span><span class="va">published_censored</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">15</span>, <span class="fl">22</span>, <span class="fl">35</span>, <span class="fl">48</span>, <span class="fl">62</span>, <span class="fl">75</span>, <span class="fl">90</span><span class="op">)</span></span>
@@ -517,6 +573,88 @@ hazard rates</li>
 </div>
 </div>
 <div class="section level2">
+<h2 id="performance-assessment">Performance Assessment<a class="anchor" aria-label="anchor" href="#performance-assessment"></a>
+</h2>
+<div class="section level3">
+<h3 id="computational-efficiency">Computational Efficiency<a class="anchor" aria-label="anchor" href="#computational-efficiency"></a>
+</h3>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Benchmark computational performance</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">result_timing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">n_risk</span>, <span class="va">n_censored</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    user  system elapsed </span></span>
+<span><span class="co">#&gt;       0       0       0</span></span>
+<span></span>
+<span><span class="co"># Test with larger datasets</span></span>
+<span><span class="va">large_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">large_n_risk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">100</span>, length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">large_times</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">large_censored</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">large_times</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Performance with larger dataset:"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Performance with larger dataset:"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">large_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span><span class="va">large_times</span>, <span class="va">large_n_risk</span>, <span class="va">large_censored</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    user  system elapsed </span></span>
+<span><span class="co">#&gt;   0.001   0.001   0.000</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Large dataset median survival:"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Large dataset median survival:"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">large_result</span><span class="op">$</span><span class="va">median_survival</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "47.51 months"</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="advanced-applications">Advanced Applications<a class="anchor" aria-label="anchor" href="#advanced-applications"></a>
+</h2>
+<div class="section level3">
+<h3 id="median-calculation-for-complex-scenarios">Median Calculation for Complex Scenarios<a class="anchor" aria-label="anchor" href="#median-calculation-for-complex-scenarios"></a>
+</h3>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Example with complex piecewise exponential parameters</span></span>
+<span><span class="va">complex_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">15</span>, <span class="fl">18</span>, <span class="fl">21</span>, <span class="fl">24</span><span class="op">)</span></span>
+<span><span class="va">complex_hazards</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.02</span>, <span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span>, <span class="fl">0.18</span>, <span class="fl">0.22</span>, <span class="fl">0.25</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">complex_median</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getMediansurv.html">getMediansurv</a></span><span class="op">(</span><span class="va">complex_times</span>, <span class="va">complex_hazards</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Complex scenario median:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">complex_median</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Complex scenario median: 11.03 months"</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="sensitivity-analysis">Sensitivity Analysis<a class="anchor" aria-label="anchor" href="#sensitivity-analysis"></a>
+</h3>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Sensitivity to censoring assumptions</span></span>
+<span><span class="va">censoring_levels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span><span class="op">)</span></span>
+<span><span class="va">median_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">censoring_levels</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">censoring_levels</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">sim_sens</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">200</span>, time_points <span class="op">=</span> <span class="va">true_time_points</span>, </span>
+<span>                    hazard_rates <span class="op">=</span> <span class="va">true_hazard_rates</span>, max_time <span class="op">=</span> <span class="fl">24</span>,</span>
+<span>                    censoring_prob <span class="op">=</span> <span class="va">censoring_levels</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, seed <span class="op">=</span> <span class="fl">100</span> <span class="op">+</span> <span class="va">i</span><span class="op">)</span></span>
+<span>  <span class="va">km_sens</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summaryKM.html">summaryKM</a></span><span class="op">(</span><span class="va">sim_sens</span>, <span class="va">true_time_points</span><span class="op">)</span></span>
+<span>  <span class="va">result_sens</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span><span class="va">true_time_points</span>, <span class="va">km_sens</span><span class="op">$</span><span class="va">n_risk</span>, </span>
+<span>                               <span class="va">km_sens</span><span class="op">$</span><span class="va">n_censored_cumulative</span><span class="op">)</span></span>
+<span>  <span class="va">median_estimates</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">result_sens</span><span class="op">$</span><span class="va">median_survival</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">sensitivity_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Censoring <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">censoring_levels</span> <span class="op">*</span> <span class="fl">100</span>, <span class="st">"%"</span><span class="op">)</span>,</span>
+<span>  Median_Estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">median_estimates</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  Bias <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">median_estimates</span> <span class="op">-</span> <span class="va">true_median</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Sensitivity to censoring rate:"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Sensitivity to censoring rate:"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sensitivity_table</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Censoring Median_Estimate  Bias</span></span>
+<span><span class="co">#&gt; 1        5%           10.25 -0.66</span></span>
+<span><span class="co">#&gt; 2       10%           12.10  1.18</span></span>
+<span><span class="co">#&gt; 3       15%           10.74 -0.17</span></span>
+<span><span class="co">#&gt; 4       20%           11.98  1.06</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
 <p>The <code>mimicsurv</code> package provides:</p>
@@ -528,14 +666,18 @@ parameters from published data</li>
 <strong>Simulation capabilities</strong> for method validation and
 power analysis</li>
 <li>
-<strong>Reproducible results</strong> through seed
-specification</li>
+<strong>Mixed exponential distribution analysis</strong> for
+combining multiple subgroups</li>
+<li>
+<strong>Reproducible results</strong> with seed specification</li>
 <li>
 <strong>Mathematical foundation</strong> based on established
 epidemiological principles</li>
 </ul>
-<p>Key advantages:</p>
-<ol style="list-style-type: decimal">
+<div class="section level3">
+<h3 id="key-advantages">Key Advantages<a class="anchor" aria-label="anchor" href="#key-advantages"></a>
+</h3>
+<ul>
 <li>
 <strong>Non-parametric approach</strong>: No distributional
 assumptions beyond piecewise exponentiality</li>
@@ -548,11 +690,36 @@ person-years methodology</li>
 <li>
 <strong>Practical utility</strong>: Applicable to real published
 survival data</li>
-</ol>
+</ul>
 <p>The method demonstrates excellent performance in recovering true
 hazard rates with relative errors typically under 15%, making it
 suitable for meta-analyses and comparative effectiveness research based
 on published survival curves.</p>
+</div>
+<div class="section level3">
+<h3 id="key-functions-summary">Key Functions Summary<a class="anchor" aria-label="anchor" href="#key-functions-summary"></a>
+</h3>
+<ul>
+<li>
+<code><a href="../reference/extractfromKM.html">extractfromKM()</a></code>: Extract survival analysis results from
+Kaplan-Meier tables</li>
+<li>
+<code><a href="../reference/mstfromExpdists.html">mstfromExpdists()</a></code>: Calculate overall median survival
+time from mixed exponential distributions</li>
+<li>
+<code><a href="../reference/simPE.html">simPE()</a></code>: Simulate survival data from piecewise
+exponential distributions</li>
+<li>
+<code><a href="../reference/summaryKM.html">summaryKM()</a></code>: Create Kaplan-Meier style summary tables
+from simulated data</li>
+<li>
+<code><a href="../reference/getMediansurv.html">getMediansurv()</a></code>: Calculate median survival time from
+piecewise exponential parameters</li>
+</ul>
+<p>For real-world applications, see the <a href="../articles/keynote859-analysis.html">KEYNOTE-859 Analysis
+vignette</a> which demonstrates the complete workflow using actual
+clinical trial data.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

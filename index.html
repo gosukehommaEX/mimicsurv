@@ -44,7 +44,7 @@
 <li class="nav-item"><a class="nav-link" href="news/index.html">News</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/gosukehommaEX/mimicsurv"><span class="fa fa-github"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/gosukehommaEX/mimicsurv" aria-label="GitHub repository"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -53,7 +53,7 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="mimicsurv-">mimicsurv <img src="reference/figures/mimicsurv_sticker.png" align="right" height="139"><a class="anchor" aria-label="anchor" href="#mimicsurv-"></a>
+<div class="page-header"><h1 id="mimicsurv-">mimicsurv <img src="reference/figures/mimicsurv_sticker.png" align="right" height="120" alt="mimicsurv logo"><a class="anchor" aria-label="anchor" href="#mimicsurv-"></a>
 </h1></div>
 <blockquote>
 <p>Extract Survival Analysis Results from Kaplan-Meier Tables Using Person-Years Method</p>
@@ -64,7 +64,7 @@
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <p>The <code>mimicsurv</code> package provides tools for survival analysis from published Kaplan-Meier tables using the person-years method. This package enables researchers to extract quantitative survival analysis results from published studies when individual patient data is not available.</p>
-<p>It also includes simulation functions for validation of the estimation methods.</p>
+<p>It also includes simulation functions for method validation and support for mixed exponential distribution analysis.</p>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
@@ -113,7 +113,9 @@
 <li>
 <strong>Calculate median survival times</strong> when not explicitly reported</li>
 <li>
-<strong>Validate methodology</strong> with simulation functions</li>
+<strong>Mixed exponential distribution analysis</strong> for combining multiple subgroups</li>
+<li>
+<strong>Simulation functions</strong> for method validation</li>
 <li>
 <strong>Real-world examples</strong> including KEYNOTE-859 clinical trial analysis</li>
 <li>
@@ -123,6 +125,9 @@
 <div class="section level2">
 <h2 id="quick-example">Quick Example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
 </h2>
+<div class="section level3">
+<h3 id="basic-survival-analysis-from-kaplan-meier-tables">Basic Survival Analysis from Kaplan-Meier Tables<a class="anchor" aria-label="anchor" href="#basic-survival-analysis-from-kaplan-meier-tables"></a>
+</h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://gosukehommaEX.github.io/mimicsurv/">mimicsurv</a></span><span class="op">)</span></span>
 <span></span>
@@ -138,6 +143,38 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">hazard_table</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Median survival time:"</span>, <span class="va">result</span><span class="op">$</span><span class="va">median_survival</span>, <span class="st">"months"</span><span class="op">)</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="mixed-exponential-distribution-analysis">Mixed Exponential Distribution Analysis<a class="anchor" aria-label="anchor" href="#mixed-exponential-distribution-analysis"></a>
+</h3>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Calculate overall median survival time from multiple subgroups</span></span>
+<span><span class="va">sample_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">150</span><span class="op">)</span>  <span class="co"># Sample sizes for each subgroup</span></span>
+<span><span class="va">MST_subgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">7.5</span><span class="op">)</span>   <span class="co"># Median survival times for each subgroup</span></span>
+<span></span>
+<span><span class="co"># Calculate overall median survival time</span></span>
+<span><span class="va">result_mixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/mstfromExpdists.html">mstfromExpdists</a></span><span class="op">(</span><span class="va">sample_sizes</span>, <span class="va">MST_subgroups</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result_mixed</span><span class="op">$</span><span class="va">subgroup_summary</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Overall MST:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">result_mixed</span><span class="op">$</span><span class="va">MST_overall</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="core-functions">Core Functions<a class="anchor" aria-label="anchor" href="#core-functions"></a>
+</h2>
+<ul>
+<li>
+<strong><code><a href="reference/extractfromKM.html">extractfromKM()</a></code></strong>: Extract survival analysis results from Kaplan-Meier tables</li>
+<li>
+<strong><code><a href="reference/mstfromExpdists.html">mstfromExpdists()</a></code></strong>: Calculate overall median survival time from mixed exponential distributions</li>
+<li>
+<strong><code><a href="reference/simPE.html">simPE()</a></code></strong>: Simulate survival data from piecewise exponential distributions</li>
+<li>
+<strong><code><a href="reference/summaryKM.html">summaryKM()</a></code></strong>: Create Kaplan-Meier style summary tables from simulated data</li>
+<li>
+<strong><code><a href="reference/getMediansurv.html">getMediansurv()</a></code></strong>: Calculate median survival time from piecewise exponential parameters</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="methodology">Methodology<a class="anchor" aria-label="anchor" href="#methodology"></a>
 </h2>
@@ -151,6 +188,7 @@
 <li>
 <strong>Uniform distribution</strong> of events and censoring within intervals</li>
 </ul>
+<p>For mixed exponential distributions, the package uses numerical methods to solve: <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><msub><mi>p</mi><mi>j</mi></msub><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><msub><mi>λ</mi><mi>j</mi></msub><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">S(t) = \sum_{j=1}^{k} p_j \exp(-\lambda_j t) = 0.5</annotation></semantics></math></p>
 <p>For detailed mathematical background, see the <a href="https://gosukehommaEX.github.io/mimicsurv/articles/getting-started.html">Getting Started vignette</a>.</p>
 </div>
 <div class="section level2">
@@ -165,6 +203,8 @@
 <strong>Clinical trial re-analysis</strong> and validation</li>
 <li>
 <strong>Academic research</strong> when individual patient data (IPD) is unavailable</li>
+<li>
+<strong>Combining survival data</strong> from multiple subgroups with different characteristics</li>
 </ul>
 </div>
 <div class="section level2">
@@ -230,8 +270,6 @@ https://github.com/gosukehommaEX/mimicsurv</code></pre>
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://github.com/gosukehommaEX/mimicsurv/actions" class="external-link"><img src="https://github.com/gosukehommaEX/mimicsurv/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://CRAN.R-project.org/package=mimicsurv" class="external-link"><img src="https://www.r-pkg.org/badges/version/mimicsurv" alt="CRAN status"></a></li>
-<li><a href="https://codecov.io/gh/gosukehommaEX/mimicsurv?branch=main" class="external-link"><img src="https://codecov.io/gh/gosukehommaEX/mimicsurv/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
 </ul>
 </div>
 
