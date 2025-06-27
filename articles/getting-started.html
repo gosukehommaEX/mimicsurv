@@ -135,21 +135,26 @@ Subgroups<a class="anchor" aria-label="anchor" href="#calculating-overall-median
 median survival time for a mixed population composed of multiple
 subgroups, each following exponential distributions:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example: Two biomarker subgroups</span></span>
-<span><span class="va">sample_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">150</span><span class="op">)</span></span>
-<span><span class="va">MST_subgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">7.5</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Example: Two biomarker subgroups with known expected events</span></span>
+<span><span class="co"># In practice, these would come from published studies or trial design</span></span>
+<span><span class="va">expected_events</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">75</span>, <span class="fl">120</span><span class="op">)</span>  <span class="co"># Expected events from each subgroup</span></span>
+<span><span class="va">MST_subgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">7.5</span><span class="op">)</span>     <span class="co"># Median survival times from each subgroup</span></span>
 <span></span>
-<span><span class="va">result_mixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mstfromExpdists.html">mstfromExpdists</a></span><span class="op">(</span><span class="va">sample_sizes</span>, <span class="va">MST_subgroups</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Expected events:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">expected_events</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Expected events: 75, 120"</span></span>
+<span></span>
+<span><span class="co"># Use expected events for mixing probabilities</span></span>
+<span><span class="va">result_mixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mstfromExpdists.html">mstfromExpdists</a></span><span class="op">(</span><span class="va">expected_events</span>, <span class="va">MST_subgroups</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># View subgroup summary</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result_mixed</span><span class="op">$</span><span class="va">subgroup_summary</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   subgroup sample_size MST</span></span>
-<span><span class="co">#&gt; 1        1         100 6.0</span></span>
-<span><span class="co">#&gt; 2        2         150 7.5</span></span>
+<span><span class="co">#&gt;   subgroup expected_events MST</span></span>
+<span><span class="co">#&gt; 1        1              75 6.0</span></span>
+<span><span class="co">#&gt; 2        2             120 7.5</span></span>
 <span></span>
 <span><span class="co"># View overall median survival time</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Overall MST:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">result_mixed</span><span class="op">$</span><span class="va">MST_overall</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Overall MST: 6.85 months</span></span></code></pre></div>
+<span><span class="co">#&gt; Overall MST: 6.87 months</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="understanding-mixed-exponential-distributions">Understanding Mixed Exponential Distributions<a class="anchor" aria-label="anchor" href="#understanding-mixed-exponential-distributions"></a>
@@ -165,21 +170,37 @@ exponential distributions, the overall population follows a
 subgroups, the overall survival function is:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></munderover><msub><mi>p</mi><mi>j</mi></msub><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><msub><mi>λ</mi><mi>j</mi></msub><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">S(t) = \sum_{j=1}^{k} p_j \exp(-\lambda_j t)</annotation></semantics></math></p>
 <p>where: -
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>j</mi></msub><mo>=</mo><mfrac><msub><mi>n</mi><mi>j</mi></msub><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></msubsup><msub><mi>n</mi><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">p_j = \frac{n_j}{\sum_{i=1}^{k} n_i}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>p</mi><mi>j</mi></msub><mo>=</mo><mfrac><msub><mi>E</mi><mi>j</mi></msub><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>k</mi></msubsup><msub><mi>E</mi><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">p_j = \frac{E_j}{\sum_{i=1}^{k} E_i}</annotation></semantics></math>
 is the mixing probability for subgroup
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
--
+based on expected events -
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mi>j</mi></msub><mo>=</mo><mfrac><mrow><mo>ln</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><msub><mtext mathvariant="normal">MST</mtext><mi>j</mi></msub></mfrac></mrow><annotation encoding="application/x-tex">\lambda_j = \frac{\ln(2)}{\text{MST}_j}</annotation></semantics></math>
 is the hazard rate for subgroup
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
 -
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mi>j</mi></msub><annotation encoding="application/x-tex">n_j</annotation></semantics></math>
-is the sample size of subgroup
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>E</mi><mi>j</mi></msub><annotation encoding="application/x-tex">E_j</annotation></semantics></math>
+is the expected number of events in subgroup
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
 -
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mtext mathvariant="normal">MST</mtext><mi>j</mi></msub><annotation encoding="application/x-tex">\text{MST}_j</annotation></semantics></math>
 is the median survival time for subgroup
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math></p>
+</div>
+<div class="section level4">
+<h4 id="expected-events-calculation">Expected Events Calculation<a class="anchor" aria-label="anchor" href="#expected-events-calculation"></a>
+</h4>
+<p>The expected number of events for each subgroup can be calculated
+from sample sizes and median survival times as:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>E</mi><mi>j</mi></msub><mo>=</mo><msub><mi>n</mi><mi>j</mi></msub><mo>×</mo><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><msub><mi>λ</mi><mi>j</mi></msub><mo>×</mo><msub><mi>t</mi><mtext mathvariant="normal">follow-up</mtext></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">E_j = n_j \times [1 - \exp(-\lambda_j \times t_{\text{follow-up}})]</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>n</mi><mi>j</mi></msub><annotation encoding="application/x-tex">n_j</annotation></semantics></math>
+is the sample size and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mtext mathvariant="normal">follow-up</mtext></msub><annotation encoding="application/x-tex">t_{\text{follow-up}}</annotation></semantics></math>
+is the follow-up time.</p>
+<p><strong>However, when working with published data, it is preferable
+to use the actual reported number of events</strong> rather than
+calculating expected events, as this provides more accurate
+information.</p>
 </div>
 <div class="section level4">
 <h4 id="median-survival-time-calculation">Median Survival Time Calculation<a class="anchor" aria-label="anchor" href="#median-survival-time-calculation"></a>
@@ -198,36 +219,82 @@ when
 <h3 id="three-subgroup-example">Three Subgroup Example<a class="anchor" aria-label="anchor" href="#three-subgroup-example"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example: Three treatment subgroups</span></span>
-<span><span class="va">sample_sizes_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">300</span>, <span class="fl">100</span><span class="op">)</span></span>
-<span><span class="va">MST_subgroups_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">12</span>, <span class="fl">15</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Example: Three treatment subgroups with known expected events</span></span>
+<span><span class="va">expected_events_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">150</span>, <span class="fl">180</span>, <span class="fl">60</span><span class="op">)</span>  <span class="co"># Expected events from published data</span></span>
+<span><span class="va">MST_subgroups_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">12</span>, <span class="fl">15</span><span class="op">)</span>       <span class="co"># Median survival times from each subgroup</span></span>
 <span></span>
-<span><span class="va">result_3groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mstfromExpdists.html">mstfromExpdists</a></span><span class="op">(</span><span class="va">sample_sizes_3</span>, <span class="va">MST_subgroups_3</span><span class="op">)</span></span>
+<span><span class="va">result_3groups</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mstfromExpdists.html">mstfromExpdists</a></span><span class="op">(</span><span class="va">expected_events_3</span>, <span class="va">MST_subgroups_3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># View results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result_3groups</span><span class="op">$</span><span class="va">subgroup_summary</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   subgroup sample_size MST</span></span>
-<span><span class="co">#&gt; 1        1         200   8</span></span>
-<span><span class="co">#&gt; 2        2         300  12</span></span>
-<span><span class="co">#&gt; 3        3         100  15</span></span>
+<span><span class="co">#&gt;   subgroup expected_events MST</span></span>
+<span><span class="co">#&gt; 1        1             150   8</span></span>
+<span><span class="co">#&gt; 2        2             180  12</span></span>
+<span><span class="co">#&gt; 3        3              60  15</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Overall MST:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">result_3groups</span><span class="op">$</span><span class="va">MST_overall</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Overall MST: 10.8 months</span></span>
+<span><span class="co">#&gt; Overall MST: 10.54 months</span></span>
 <span></span>
 <span><span class="co"># Compare with simple weighted average (incorrect method)</span></span>
+<span><span class="co"># For comparison: if we incorrectly used sample sizes</span></span>
+<span><span class="va">sample_sizes_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">300</span>, <span class="fl">100</span><span class="op">)</span>  <span class="co"># Hypothetical sample sizes</span></span>
 <span><span class="va">weighted_avg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sample_sizes_3</span> <span class="op">*</span> <span class="va">MST_subgroups_3</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sample_sizes_3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Simple weighted average:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">weighted_avg</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Simple weighted average: 11.17 months</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Difference:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">result_3groups</span><span class="op">$</span><span class="va">MST_overall</span> <span class="op">-</span> <span class="va">weighted_avg</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Difference: 0.37 months</span></span></code></pre></div>
+<span><span class="co">#&gt; Difference: 0.63 months</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="why-simple-weighted-average-is-incorrect">Why Simple Weighted Average is Incorrect<a class="anchor" aria-label="anchor" href="#why-simple-weighted-average-is-incorrect"></a>
+<h3 id="working-with-published-data">Working with Published Data<a class="anchor" aria-label="anchor" href="#working-with-published-data"></a>
+</h3>
+<p>For convenience when working with published data that only provides
+sample sizes, you can calculate expected events:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># When only sample sizes are available from published studies</span></span>
+<span><span class="va">sample_sizes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">150</span><span class="op">)</span></span>
+<span><span class="va">MST_subgroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">7.5</span><span class="op">)</span></span>
+<span><span class="va">follow_up_time</span> <span class="op">&lt;-</span> <span class="fl">24</span>  <span class="co"># months</span></span>
+<span></span>
+<span><span class="co"># Calculate expected events using exponential distribution formula</span></span>
+<span><span class="va">lambda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="va">MST_subgroups</span></span>
+<span><span class="va">expected_events</span> <span class="op">&lt;-</span> <span class="va">sample_sizes</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="va">lambda</span> <span class="op">*</span> <span class="va">follow_up_time</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">result_from_samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mstfromExpdists.html">mstfromExpdists</a></span><span class="op">(</span><span class="va">expected_events</span>, <span class="va">MST_subgroups</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  subgroup <span class="op">=</span> <span class="va">result_from_samples</span><span class="op">$</span><span class="va">subgroup_summary</span><span class="op">$</span><span class="va">subgroup</span>,</span>
+<span>  sample_size <span class="op">=</span> <span class="va">sample_sizes</span>,</span>
+<span>  expected_events <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">expected_events</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  MST <span class="op">=</span> <span class="va">MST_subgroups</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   subgroup sample_size expected_events MST</span></span>
+<span><span class="co">#&gt; 1        1         100            93.8 6.0</span></span>
+<span><span class="co">#&gt; 2        2         150           133.7 7.5</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Overall MST (from sample sizes):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">result_from_samples</span><span class="op">$</span><span class="va">MST_overall</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"months\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Overall MST (from sample sizes): 6.83 months</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="why-expected-events-based-mixing-is-correct">Why Expected Events-Based Mixing is Correct<a class="anchor" aria-label="anchor" href="#why-expected-events-based-mixing-is-correct"></a>
 </h3>
 <p>The median is a <strong>non-linear statistic</strong>, and for
 mixture distributions:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">Median</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mi>X</mi><mo>+</mo><mi>b</mi><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≠</mo><mi>a</mi><mo>⋅</mo><mtext mathvariant="normal">Median</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>b</mi><mo>⋅</mo><mtext mathvariant="normal">Median</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{Median}(aX + bY) \neq a \cdot \text{Median}(X) + b \cdot \text{Median}(Y)</annotation></semantics></math></p>
+<p>More importantly, mixing probabilities should reflect the
+<strong>information content</strong> (expected events) rather than just
+sample sizes, because:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Information weighting</strong>: Groups with longer survival
+contribute less information per patient</li>
+<li>
+<strong>Follow-up considerations</strong>: Different follow-up times
+affect the number of observed events</li>
+<li>
+<strong>Censoring patterns</strong>: Differential censoring affects
+the actual information available</li>
+</ol>
 <p>The correct approach requires solving the survival equation
-numerically, as implemented in <code><a href="../reference/mstfromExpdists.html">mstfromExpdists()</a></code>.</p>
+numerically using event-based mixing probabilities, as implemented in
+<code><a href="../reference/mstfromExpdists.html">mstfromExpdists()</a></code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -380,7 +447,7 @@ S(t_k) \exp(-\lambda_k (t - t_k)) &amp; \text{if } t \in [t_k, t_{k+1})
 </h3>
 <p>The <code><a href="../reference/simPE.html">simPE()</a></code> function generates survival data from
 piecewise exponential distributions:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define true parameters</span></span>
 <span><span class="va">true_time_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">6</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">24</span><span class="op">)</span></span>
 <span><span class="va">true_hazard_rates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span><span class="op">)</span></span>
@@ -423,7 +490,7 @@ piecewise exponential distributions:</p>
 <div class="section level3">
 <h3 id="creating-summary-tables">Creating Summary Tables<a class="anchor" aria-label="anchor" href="#creating-summary-tables"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create Kaplan-Meier style summary</span></span>
 <span><span class="va">km_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summaryKM.html">summaryKM</a></span><span class="op">(</span><span class="va">sim_data</span>, <span class="va">true_time_points</span><span class="op">)</span></span>
 <span></span>
@@ -460,7 +527,7 @@ piecewise exponential distributions:</p>
 </h3>
 <p>The simulation functions support seed specification for reproducible
 results:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Demonstrate reproducibility with seeds</span></span>
 <span><span class="va">sim1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simPE.html">simPE</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, time_points <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">12</span>, <span class="fl">24</span><span class="op">)</span>, </span>
 <span>              hazard_rates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.2</span><span class="op">)</span>, max_time <span class="op">=</span> <span class="fl">24</span>, seed <span class="op">=</span> <span class="fl">456</span><span class="op">)</span></span>
@@ -503,7 +570,7 @@ results:</p>
 </h3>
 <p>We can compare our method performance on both simulated and published
 data:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Apply our method to simulated data</span></span>
 <span><span class="va">sim_result</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span></span>
 <span>  time_points <span class="op">=</span> <span class="va">true_time_points</span>,</span>
@@ -547,7 +614,7 @@ data:</p>
 <div class="section level3">
 <h3 id="analysis-of-published-data">Analysis of Published Data<a class="anchor" aria-label="anchor" href="#analysis-of-published-data"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare our method with published Kaplan-Meier data</span></span>
 <span><span class="va">published_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">15</span>, <span class="fl">18</span>, <span class="fl">21</span>, <span class="fl">24</span><span class="op">)</span></span>
 <span><span class="va">published_n_risk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">180</span>, <span class="fl">165</span>, <span class="fl">145</span>, <span class="fl">128</span>, <span class="fl">110</span>, <span class="fl">95</span>, <span class="fl">78</span>, <span class="fl">65</span>, <span class="fl">50</span><span class="op">)</span></span>
@@ -578,13 +645,13 @@ data:</p>
 <div class="section level3">
 <h3 id="computational-efficiency">Computational Efficiency<a class="anchor" aria-label="anchor" href="#computational-efficiency"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Benchmark computational performance</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">result_timing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractfromKM.html">extractfromKM</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="va">n_risk</span>, <span class="va">n_censored</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   0.001   0.000   0.001</span></span>
+<span><span class="co">#&gt;       0       0       0</span></span>
 <span></span>
 <span><span class="co"># Test with larger datasets</span></span>
 <span><span class="va">large_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">60</span>, by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
@@ -611,7 +678,7 @@ data:</p>
 <div class="section level3">
 <h3 id="median-calculation-for-complex-scenarios">Median Calculation for Complex Scenarios<a class="anchor" aria-label="anchor" href="#median-calculation-for-complex-scenarios"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example with complex piecewise exponential parameters</span></span>
 <span><span class="va">complex_times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">6</span>, <span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">15</span>, <span class="fl">18</span>, <span class="fl">21</span>, <span class="fl">24</span><span class="op">)</span></span>
 <span><span class="va">complex_hazards</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.02</span>, <span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span>, <span class="fl">0.18</span>, <span class="fl">0.22</span>, <span class="fl">0.25</span><span class="op">)</span></span>
@@ -623,7 +690,7 @@ data:</p>
 <div class="section level3">
 <h3 id="sensitivity-analysis">Sensitivity Analysis<a class="anchor" aria-label="anchor" href="#sensitivity-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Sensitivity to censoring assumptions</span></span>
 <span><span class="va">censoring_levels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span><span class="op">)</span></span>
 <span><span class="va">median_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">censoring_levels</span><span class="op">)</span><span class="op">)</span></span>
@@ -667,7 +734,7 @@ parameters from published data</li>
 power analysis</li>
 <li>
 <strong>Mixed exponential distribution analysis</strong> for
-combining multiple subgroups</li>
+combining multiple subgroups with event-based mixing</li>
 <li>
 <strong>Reproducible results</strong> with seed specification</li>
 <li>
@@ -686,7 +753,7 @@ assumptions beyond piecewise exponentiality</li>
 for simulation studies</li>
 <li>
 <strong>Theoretically grounded</strong>: Based on established
-person-years methodology</li>
+person-years methodology and event-based mixing</li>
 <li>
 <strong>Practical utility</strong>: Applicable to real published
 survival data</li>
@@ -705,7 +772,7 @@ on published survival curves.</p>
 Kaplan-Meier tables</li>
 <li>
 <code><a href="../reference/mstfromExpdists.html">mstfromExpdists()</a></code>: Calculate overall median survival
-time from mixed exponential distributions</li>
+time from mixed exponential distributions using event-based mixing</li>
 <li>
 <code><a href="../reference/simPE.html">simPE()</a></code>: Simulate survival data from piecewise
 exponential distributions</li>
