@@ -50,11 +50,11 @@ cat("Median survival time:", result$median_survival, "months\n")
 
 The hazard table shows:
 
-- **interval**: Time intervals for hazard estimation
-- **n_at_risk_start**: Number of patients at risk at the start of each interval
-- **n_censored_interval**: Number of patients censored within each interval
-- **n_events**: Number of events (estimated) within each interval
-- **hazard_rate**: Estimated hazard rate (events per person-time)
+-   **interval**: Time intervals for hazard estimation
+-   **n_at_risk_start**: Number of patients at risk at the start of each interval
+-   **n_censored_interval**: Number of patients censored within each interval
+-   **n_events**: Number of events (estimated) within each interval
+-   **hazard_rate**: Estimated hazard rate (events per person-time)
 
 ## Mixed Exponential Distributions
 
@@ -64,10 +64,17 @@ The `mstfromExpdists()` function calculates the overall median survival time for
 
 ```{r mixed-exponential-basic}
 # Example: Two biomarker subgroups
+# First calculate expected events from sample sizes and median survival times
 sample_sizes <- c(100, 150)
 MST_subgroups <- c(6, 7.5)
+follow_up_time <- 24  # months
 
-result_mixed <- mstfromExpdists(sample_sizes, MST_subgroups)
+# Calculate expected events (theoretically correct approach)
+expected_events <- calculate_expected_events(sample_sizes, MST_subgroups, follow_up_time)
+print(paste("Expected events:", round(expected_events, 1)))
+
+# Use expected events for mixing probabilities
+result_mixed <- mstfromExpdists(expected_events, MST_subgroups)
 
 # View subgroup summary
 print(result_mixed$subgroup_summary)
@@ -86,19 +93,19 @@ For a population composed of $k$ subgroups, the overall survival function is:
 
 $$S(t) = \sum_{j=1}^{k} p_j \exp(-\lambda_j t)$$
 
-where:
-- $p_j = \frac{n_j}{\sum_{i=1}^{k} n_i}$ is the mixing probability for subgroup $j$
-- $\lambda_j = \frac{\ln(2)}{\text{MST}_j}$ is the hazard rate for subgroup $j$
-- $n_j$ is the sample size of subgroup $j$
-- $\text{MST}_j$ is the median survival time for subgroup $j$
+where: - $p_j = \frac{E_j}{\sum_{i=1}^{k} E_i}$ is the mixing probability for subgroup $j$ based on expected events - $\lambda_j = \frac{\ln(2)}{\text{MST}_j}$ is the hazard rate for subgroup $j$ - $E_j$ is the expected number of events in subgroup $j$ - $\text{MST}_j$ is the median survival time for subgroup $j$
+
+#### Expected Events Calculation
+
+The expected number of events for each subgroup is calculated as: $$E_j = n_j \times [1 - \exp(-\lambda_j \times t_{\text{follow-up}})]$$
+
+where $n_j$ is the sample size and $t_{\text{follow-up}}$ is the follow-up time.
 
 #### Median Survival Time Calculation
 
-The overall median survival time is found by solving:
-$$S(t_{median}) = 0.5$$
+The overall median survival time is found by solving: $$S(t_{median}) = 0.5$$
 
-This requires numerical methods since the equation:
-$$\sum_{j=1}^{k} p_j \exp(-\lambda_j t_{median}) = 0.5$$
+This requires numerical methods since the equation: $$\sum_{j=1}^{k} p_j \exp(-\lambda_j t_{median}) = 0.5$$
 
 cannot be solved analytically for $t_{median}$ when $k > 1$.
 
@@ -109,7 +116,10 @@ cannot be solved analytically for $t_{median}$ when $k > 1$.
 sample_sizes_3 <- c(200, 300, 100)
 MST_subgroups_3 <- c(8, 12, 15)
 
-result_3groups <- mstfromExpdists(sample_sizes_3, MST_subgroups_3)
+# Calculate expected events
+expected_events_3 <- calculate_expected_events(sample_sizes_3, MST_subgroups_3, follow_up_time = 24)
+
+result_3groups <- mstfromExpdists(expected_events_3, MST_subgroups_3)
 
 # View results
 print(result_3groups$subgroup_summary)
@@ -121,13 +131,35 @@ cat("Simple weighted average:", round(weighted_avg, 2), "months\n")
 cat("Difference:", round(abs(result_3groups$MST_overall - weighted_avg), 2), "months\n")
 ```
 
-### Why Simple Weighted Average is Incorrect
+### Backward Compatibility: Using Sample Sizes Directly
+
+For convenience, you can also use the `mstfromExpdists_samples()` wrapper function that converts sample sizes to expected events:
+
+```{r mixed-exponential-wrapper}
+# Using the wrapper function for backward compatibility
+result_wrapper <- mstfromExpdists_samples(
+  sample_sizes = c(100, 150),
+  MST_subgroups = c(6, 7.5),
+  follow_up_time = 24
+)
+
+print(result_wrapper$subgroup_summary)
+cat("Overall MST (wrapper):", round(result_wrapper$MST_overall, 2), "months\n")
+```
+
+### Why Expected Events-Based Mixing is Correct
 
 The median is a **non-linear statistic**, and for mixture distributions:
 
 $$\text{Median}(aX + bY) \neq a \cdot \text{Median}(X) + b \cdot \text{Median}(Y)$$
 
-The correct approach requires solving the survival equation numerically, as implemented in `mstfromExpdists()`.
+More importantly, mixing probabilities should reflect the **information content** (expected events) rather than just sample sizes, because:
+
+1.  **Information weighting**: Groups with longer survival contribute less information per patient
+2.  **Follow-up considerations**: Different follow-up times affect the number of observed events
+3.  **Censoring patterns**: Differential censoring affects the actual information available
+
+The correct approach requires solving the survival equation numerically using event-based mixing probabilities, as implemented in `mstfromExpdists()`.
 
 ## Mathematical Background
 
@@ -139,8 +171,7 @@ The method relies on the following critical assumptions:
 
 #### 1. **Piecewise Exponential Survival**
 
-Within each time interval $[t_i, t_{i+1})$, the hazard rate $\lambda_i$ is constant. This implies that the survival function within interval $i$ follows:
-$$S(t | t \in [t_i, t_{i+1})) = S(t_i) \exp(-\lambda_i (t - t_i))$$
+Within each time interval $[t_i, t_{i+1})$, the hazard rate $\lambda_i$ is constant. This implies that the survival function within interval $i$ follows: $$S(t | t \in [t_i, t_{i+1})) = S(t_i) \exp(-\lambda_i (t - t_i))$$
 
 #### 2. **Non-informative Censoring**
 
@@ -158,54 +189,47 @@ Person-time represents the total observation time contributed by all individuals
 
 Individuals who neither experience events nor are censored within interval $[t_i, t_{i+1})$ contribute:
 
-- Count: $n_{\text{complete}} = n_{\text{risk}, i+1}$
-- Time per person: $\Delta t = t_{i+1} - t_i$
-- Total contribution: $n_{\text{complete}} \times \Delta t$
+-   Count: $n_{\text{complete}} = n_{\text{risk}, i+1}$
+-   Time per person: $\Delta t = t_{i+1} - t_i$
+-   Total contribution: $n_{\text{complete}} \times \Delta t$
 
 #### Partial Interval Contributors
 
 Individuals experiencing events or censoring within the interval contribute:
 
-- Count: $n_{\text{partial}} = n_{\text{events}} + n_{\text{censored}} = n_{\text{risk}, i} - n_{\text{risk}, i+1}$
-- Expected time per person: $\frac{\Delta t}{2}$ (due to uniform distribution assumption)
-- Total contribution: $n_{\text{partial}} \times \frac{\Delta t}{2}$
+-   Count: $n_{\text{partial}} = n_{\text{events}} + n_{\text{censored}} = n_{\text{risk}, i} - n_{\text{risk}, i+1}$
+-   Expected time per person: $\frac{\Delta t}{2}$ (due to uniform distribution assumption)
+-   Total contribution: $n_{\text{partial}} \times \frac{\Delta t}{2}$
 
 #### Mathematical Justification for $\Delta t / 2$
 
-Under the uniform distribution assumption, if $U \sim \text{Uniform}(0, \Delta t)$ represents the time from interval start to event/censoring, then:
-$$E[U] = \frac{0 + \Delta t}{2} = \frac{\Delta t}{2}$$
+Under the uniform distribution assumption, if $U \sim \text{Uniform}(0, \Delta t)$ represents the time from interval start to event/censoring, then: $$E[U] = \frac{0 + \Delta t}{2} = \frac{\Delta t}{2}$$
 
 This is why we multiply by $\frac{\Delta t}{2}$ rather than some other fraction.
 
 #### Trapezoidal Rule Implementation
 
-Combining both contributions:
-$$\text{Person-time}_i = n_{\text{risk}, i+1} \times \Delta t + (n_{\text{risk}, i} - n_{\text{risk}, i+1}) \times \frac{\Delta t}{2}$$
+Combining both contributions: $$\text{Person-time}_i = n_{\text{risk}, i+1} \times \Delta t + (n_{\text{risk}, i} - n_{\text{risk}, i+1}) \times \frac{\Delta t}{2}$$
 
-Simplifying:
-$$\text{Person-time}_i = \frac{(n_{\text{risk}, i} + n_{\text{risk}, i+1}) \times \Delta t}{2}$$
+Simplifying: $$\text{Person-time}_i = \frac{(n_{\text{risk}, i} + n_{\text{risk}, i+1}) \times \Delta t}{2}$$
 
 This is the **trapezoidal rule** for numerical integration.
 
 ### Hazard Rate Estimation
 
-Once person-time is calculated, the hazard rate for interval $i$ is estimated as:
-$$\hat{\lambda}_i = \frac{n_{\text{events}, i}}{\text{Person-time}_i}$$
+Once person-time is calculated, the hazard rate for interval $i$ is estimated as: $$\hat{\lambda}_i = \frac{n_{\text{events}, i}}{\text{Person-time}_i}$$
 
 ### Event Calculation
 
-The number of events in interval $i$ is estimated as:
-$$n_{\text{events}, i} = n_{\text{risk}, i} - n_{\text{risk}, i+1} - n_{\text{censored}, i}$$
+The number of events in interval $i$ is estimated as: $$n_{\text{events}, i} = n_{\text{risk}, i} - n_{\text{risk}, i+1} - n_{\text{censored}, i}$$
 
 where $n_{\text{censored}, i}$ is the number of individuals censored during interval $i$.
 
 ### Median Survival Time Calculation
 
-For piecewise exponential survival, the median is found by solving:
-$$S(t_{\text{median}}) = 0.5$$
+For piecewise exponential survival, the median is found by solving: $$S(t_{\text{median}}) = 0.5$$
 
-where:
-$$S(t) = \begin{cases}
+where: $$S(t) = \begin{cases}
 \exp\left(-\sum_{j=1}^{k} \lambda_j \Delta t_j\right) & \text{if } t \text{ in interval } k+1 \\
 S(t_k) \exp(-\lambda_k (t - t_k)) & \text{if } t \in [t_k, t_{k+1})
 \end{cases}$$
@@ -406,27 +430,29 @@ print(sensitivity_table)
 
 The `mimicsurv` package provides:
 
-- **Robust methodology** for extracting survival parameters from published data
-- **Simulation capabilities** for method validation and power analysis
-- **Mixed exponential distribution analysis** for combining multiple subgroups
-- **Reproducible results** with seed specification
-- **Mathematical foundation** based on established epidemiological principles
+-   **Robust methodology** for extracting survival parameters from published data
+-   **Simulation capabilities** for method validation and power analysis
+-   **Mixed exponential distribution analysis** for combining multiple subgroups with event-based mixing
+-   **Reproducible results** with seed specification
+-   **Mathematical foundation** based on established epidemiological principles
 
 ### Key Advantages
 
-- **Non-parametric approach**: No distributional assumptions beyond piecewise exponentiality
-- **Computationally efficient**: Fast estimation suitable for simulation studies
-- **Theoretically grounded**: Based on established person-years methodology
-- **Practical utility**: Applicable to real published survival data
+-   **Non-parametric approach**: No distributional assumptions beyond piecewise exponentiality
+-   **Computationally efficient**: Fast estimation suitable for simulation studies
+-   **Theoretically grounded**: Based on established person-years methodology and event-based mixing
+-   **Practical utility**: Applicable to real published survival data
 
 The method demonstrates excellent performance in recovering true hazard rates with relative errors typically under 15%, making it suitable for meta-analyses and comparative effectiveness research based on published survival curves.
 
 ### Key Functions Summary
 
-- `extractfromKM()`: Extract survival analysis results from Kaplan-Meier tables
-- `mstfromExpdists()`: Calculate overall median survival time from mixed exponential distributions
-- `simPE()`: Simulate survival data from piecewise exponential distributions
-- `summaryKM()`: Create Kaplan-Meier style summary tables from simulated data
-- `getMediansurv()`: Calculate median survival time from piecewise exponential parameters
+-   `extractfromKM()`: Extract survival analysis results from Kaplan-Meier tables
+-   `mstfromExpdists()`: Calculate overall median survival time from mixed exponential distributions using event-based mixing
+-   `calculate_expected_events()`: Calculate expected events from sample sizes and median survival times
+-   `mstfromExpdists_samples()`: Wrapper function for backward compatibility with sample sizes
+-   `simPE()`: Simulate survival data from piecewise exponential distributions
+-   `summaryKM()`: Create Kaplan-Meier style summary tables from simulated data
+-   `getMediansurv()`: Calculate median survival time from piecewise exponential parameters
 
 For real-world applications, see the [KEYNOTE-859 Analysis vignette](../articles/keynote859-analysis.html) which demonstrates the complete workflow using actual clinical trial data.

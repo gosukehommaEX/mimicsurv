@@ -151,13 +151,13 @@ test_that("summaryKM input validation works", {
   )
 })
 
-# Tests for mstfromExpdists function
+# Tests for mstfromExpdists function (updated for event-based mixing)
 test_that("mstfromExpdists works with basic two-group input", {
-  # Basic two-group example
-  sample_sizes <- c(100, 150)
+  # Basic two-group example with expected events
+  expected_events <- c(75, 120)  # Expected events instead of sample sizes
   MST_subgroups <- c(6, 7.5)
 
-  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+  result <- mstfromExpdists(expected_events, MST_subgroups)
 
   # Check structure
   expect_type(result, "list")
@@ -168,10 +168,10 @@ test_that("mstfromExpdists works with basic two-group input", {
   expect_s3_class(result$subgroup_summary, "data.frame")
   expect_equal(nrow(result$subgroup_summary), 2)
   expect_equal(ncol(result$subgroup_summary), 3)
-  expect_equal(names(result$subgroup_summary), c("subgroup", "sample_size", "MST"))
+  expect_equal(names(result$subgroup_summary), c("subgroup", "expected_events", "MST"))
 
   # Check values
-  expect_equal(result$subgroup_summary$sample_size, sample_sizes)
+  expect_equal(result$subgroup_summary$expected_events, expected_events)
   expect_equal(result$subgroup_summary$MST, MST_subgroups)
   expect_equal(result$subgroup_summary$subgroup, c(1, 2))
 
@@ -187,15 +187,15 @@ test_that("mstfromExpdists works with basic two-group input", {
 })
 
 test_that("mstfromExpdists works with three-group input", {
-  # Three-group example
-  sample_sizes <- c(200, 300, 100)
+  # Three-group example with expected events
+  expected_events <- c(150, 180, 60)  # Expected events
   MST_subgroups <- c(8, 12, 15)
 
-  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+  result <- mstfromExpdists(expected_events, MST_subgroups)
 
   # Check structure
   expect_equal(nrow(result$subgroup_summary), 3)
-  expect_equal(result$subgroup_summary$sample_size, sample_sizes)
+  expect_equal(result$subgroup_summary$expected_events, expected_events)
   expect_equal(result$subgroup_summary$MST, MST_subgroups)
   expect_equal(result$subgroup_summary$subgroup, c(1, 2, 3))
 
@@ -205,26 +205,26 @@ test_that("mstfromExpdists works with three-group input", {
   expect_true(result$MST_overall <= max(MST_subgroups))
 })
 
-test_that("mstfromExpdists handles equal sample sizes correctly", {
-  # Equal sample sizes
-  sample_sizes <- c(100, 100)
+test_that("mstfromExpdists handles equal expected events correctly", {
+  # Equal expected events
+  expected_events <- c(100, 100)
   MST_subgroups <- c(6, 12)
 
-  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+  result <- mstfromExpdists(expected_events, MST_subgroups)
 
   # With equal weights, result should be closer to arithmetic mean than extreme values
   arithmetic_mean <- mean(MST_subgroups)
   expect_true(abs(result$MST_overall - arithmetic_mean) < 2)
 })
 
-test_that("mstfromExpdists handles unequal sample sizes correctly", {
-  # Very unequal sample sizes - should be closer to larger group
-  sample_sizes <- c(10, 1000)  # 10:1 ratio
+test_that("mstfromExpdists handles unequal expected events correctly", {
+  # Very unequal expected events - should be closer to larger group
+  expected_events <- c(10, 1000)  # 1:100 ratio
   MST_subgroups <- c(5, 20)
 
-  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+  result <- mstfromExpdists(expected_events, MST_subgroups)
 
-  # Result should be much closer to the MST of the larger group (20)
+  # Result should be much closer to the MST of the group with more events (20)
   expect_true(result$MST_overall > 15)  # Closer to 20 than to 5
 })
 
@@ -232,7 +232,7 @@ test_that("mstfromExpdists input validation works", {
   # Test mismatched lengths
   expect_error(
     mstfromExpdists(c(100, 150), c(6)),
-    "sample_sizes and MST_subgroups must have the same length"
+    "expected_events and MST_subgroups must have the same length"
   )
 
   # Test insufficient subgroups
@@ -241,16 +241,16 @@ test_that("mstfromExpdists input validation works", {
     "At least 2 subgroups are required"
   )
 
-  # Test negative sample sizes
+  # Test negative expected events
   expect_error(
     mstfromExpdists(c(-100, 150), c(6, 7.5)),
-    "All sample sizes must be positive"
+    "All expected event counts must be positive"
   )
 
-  # Test zero sample sizes
+  # Test zero expected events
   expect_error(
     mstfromExpdists(c(0, 150), c(6, 7.5)),
-    "All sample sizes must be positive"
+    "All expected event counts must be positive"
   )
 
   # Test negative MST values
@@ -278,21 +278,90 @@ test_that("mstfromExpdists input validation works", {
   )
 })
 
-test_that("mstfromExpdists handles edge cases", {
+# Tests for calculate_expected_events helper function
+test_that("calculate_expected_events works correctly", {
+  sample_sizes <- c(100, 150)
+  MST_subgroups <- c(6, 7.5)
+  follow_up_time <- 24
+
+  expected_events <- calculate_expected_events(sample_sizes, MST_subgroups, follow_up_time)
+
+  # Check output structure
+  expect_type(expected_events, "double")
+  expect_length(expected_events, 2)
+  expect_true(all(expected_events > 0))
+  expect_true(all(expected_events <= sample_sizes))  # Events can't exceed sample size
+
+  # Check that shorter survival leads to more events
+  expect_true(expected_events[1] > expected_events[2])  # MST 6 vs 7.5
+})
+
+test_that("calculate_expected_events input validation works", {
+  # Test mismatched lengths
+  expect_error(
+    calculate_expected_events(c(100, 150), c(6)),
+    "sample_sizes and MST_subgroups must have the same length"
+  )
+
+  # Test negative sample sizes
+  expect_error(
+    calculate_expected_events(c(-100, 150), c(6, 7.5)),
+    "All sample sizes must be positive"
+  )
+
+  # Test negative MST
+  expect_error(
+    calculate_expected_events(c(100, 150), c(-6, 7.5)),
+    "All median survival times must be positive"
+  )
+
+  # Test negative follow-up time
+  expect_error(
+    calculate_expected_events(c(100, 150), c(6, 7.5), -24),
+    "follow_up_time must be positive"
+  )
+})
+
+# Tests for mstfromExpdists_samples wrapper function
+test_that("mstfromExpdists_samples wrapper works correctly", {
+  sample_sizes <- c(100, 150)
+  MST_subgroups <- c(6, 7.5)
+  follow_up_time <- 24
+
+  result <- mstfromExpdists_samples(sample_sizes, MST_subgroups, follow_up_time)
+
+  # Check structure includes both sample sizes and expected events
+  expect_s3_class(result$subgroup_summary, "data.frame")
+  expect_true("sample_size" %in% names(result$subgroup_summary))
+  expect_true("expected_events" %in% names(result$subgroup_summary))
+  expect_true("follow_up_time" %in% names(result$subgroup_summary))
+
+  # Check values
+  expect_equal(result$subgroup_summary$sample_size, sample_sizes)
+  expect_equal(result$subgroup_summary$MST, MST_subgroups)
+  expect_true(all(result$subgroup_summary$follow_up_time == follow_up_time))
+
+  # Check MST_overall
+  expect_type(result$MST_overall, "double")
+  expect_true(is.finite(result$MST_overall))
+  expect_true(result$MST_overall > 0)
+})
+
+test_that("mstfromExpdists edge cases", {
   # Very similar MSTs
-  sample_sizes <- c(100, 100)
+  expected_events <- c(100, 100)
   MST_subgroups <- c(10.0, 10.1)
 
-  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+  result <- mstfromExpdists(expected_events, MST_subgroups)
 
   # Result should be very close to both values
   expect_true(abs(result$MST_overall - 10.05) < 0.1)
 
-  # Single dominant group
-  sample_sizes <- c(1, 10000)
-  MST_subgroups <- c(5, 50)
+  # Single dominant group by events
+  expected_events_dominant <- c(1, 1000)
+  MST_subgroups_dominant <- c(5, 50)
 
-  result_dominant <- mstfromExpdists(sample_sizes, MST_subgroups)
+  result_dominant <- mstfromExpdists(expected_events_dominant, MST_subgroups_dominant)
 
   # Should be very close to the dominant group's MST
   expect_true(result_dominant$MST_overall > 45)
@@ -300,11 +369,11 @@ test_that("mstfromExpdists handles edge cases", {
 
 test_that("mstfromExpdists handles high MST values with appropriate search range", {
   # Very high MSTs require larger search range
-  sample_sizes <- c(100, 100)
+  expected_events <- c(100, 100)
   MST_subgroups <- c(80, 120)  # High but reasonable MSTs
 
   # Should complete without error with extended search range
-  result <- mstfromExpdists(sample_sizes, MST_subgroups, search_range = c(0, 200))
+  result <- mstfromExpdists(expected_events, MST_subgroups, search_range = c(0, 200))
   expect_true(is.finite(result$MST_overall))
   expect_true(result$MST_overall > 0)
   expect_true(result$MST_overall >= min(MST_subgroups))
@@ -313,46 +382,34 @@ test_that("mstfromExpdists handles high MST values with appropriate search range
 
 test_that("mstfromExpdists warns when median is beyond search range", {
   # Very high MSTs with default search range should warn and return NA
-  sample_sizes <- c(100, 100)
+  expected_events <- c(100, 100)
   MST_subgroups <- c(1000, 2000)  # Very high MSTs
 
   # Should warn about search range and return NA
   expect_warning(
-    result <- mstfromExpdists(sample_sizes, MST_subgroups),
+    result <- mstfromExpdists(expected_events, MST_subgroups),
     "Median survival time may be beyond the upper search range"
   )
   expect_true(is.na(result$MST_overall))
 })
 
-test_that("mstfromExpdists custom search range works", {
-  sample_sizes <- c(100, 150)
-  MST_subgroups <- c(6, 7.5)
-
-  # Test with custom search range
-  result <- mstfromExpdists(sample_sizes, MST_subgroups, search_range = c(0, 50))
-
-  expect_true(is.finite(result$MST_overall))
-  expect_true(result$MST_overall > 0)
-  expect_true(result$MST_overall < 50)
-})
-
 test_that("mstfromExpdists mathematical correctness", {
   # Test mathematical properties
-  sample_sizes <- c(300, 200)
+  expected_events <- c(300, 200)
   MST_subgroups <- c(10, 20)
 
-  result <- mstfromExpdists(sample_sizes, MST_subgroups)
+  result <- mstfromExpdists(expected_events, MST_subgroups)
 
   # The result should be different from simple weighted average
-  simple_weighted_avg <- sum(sample_sizes * MST_subgroups) / sum(sample_sizes)
+  simple_weighted_avg <- sum(expected_events * MST_subgroups) / sum(expected_events)
   expect_false(abs(result$MST_overall - simple_weighted_avg) < 0.001)
 
   # Should be between min and max
   expect_true(result$MST_overall > min(MST_subgroups))
   expect_true(result$MST_overall < max(MST_subgroups))
 
-  # Should be closer to the group with larger sample size
-  # Group 1 has 300 samples with MST=10, Group 2 has 200 samples with MST=20
+  # Should be closer to the group with more expected events
+  # Group 1 has 300 events with MST=10, Group 2 has 200 events with MST=20
   # Result should be closer to 10 than to 20
   expect_true(abs(result$MST_overall - 10) < abs(result$MST_overall - 20))
 })
