@@ -78,11 +78,11 @@ cat("Median survival time:", result$median_survival, "months")
 
 ```r
 # Calculate overall median survival time from multiple subgroups
-sample_sizes <- c(100, 150)  # Sample sizes for each subgroup
-MST_subgroups <- c(6, 7.5)   # Median survival times for each subgroup
+expected_events <- c(75, 120)  # Expected event counts for each subgroup
+MST_subgroups <- c(6, 7.5)     # Median survival times for each subgroup
 
 # Calculate overall median survival time
-result_mixed <- mstfromExpdists(sample_sizes, MST_subgroups)
+result_mixed <- mstfromExpdists(expected_events, MST_subgroups)
 
 # View results
 print(result_mixed$subgroup_summary)
