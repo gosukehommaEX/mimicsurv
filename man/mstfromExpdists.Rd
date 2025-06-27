@@ -4,34 +4,34 @@
 \alias{mstfromExpdists}
 \title{Calculate Overall Median Survival Time from Mixed Exponential Distributions}
 \usage{
-mstfromExpdists(sample_sizes, MST_subgroups, search_range = c(0, 100))
+mstfromExpdists(expected_events, MST_subgroups, search_range = c(0, 100))
 }
 \arguments{
-\item{sample_sizes}{Numeric vector of sample sizes for each subgroup}
+\item{expected_events}{Numeric vector of expected event counts for each subgroup}
 
-\item{MST_subgroups}{Numeric vector of median survival times for each subgroup (same length as sample_sizes)}
+\item{MST_subgroups}{Numeric vector of median survival times for each subgroup (same length as expected_events)}
 
 \item{search_range}{Numeric vector of length 2 specifying the search interval for uniroot (default: c(0, 100))}
 }
 \value{
 List containing:
-  \item{subgroup_summary}{Data frame with subgroup details (subgroup, sample_size, MST)}
+  \item{subgroup_summary}{Data frame with subgroup details (subgroup, expected_events, MST)}
   \item{MST_overall}{Overall median survival time for the mixed population}
 }
 \description{
 This function calculates the overall median survival time for a mixed population
 composed of multiple subgroups, each following exponential distributions with
 different median survival times. The overall population follows a mixture of
-exponential distributions.
+exponential distributions with mixing probabilities based on expected event counts.
 }
 \details{
 The function assumes that each subgroup follows an exponential distribution with
 the specified median survival time. The overall population is modeled as a mixture
-of exponential distributions with mixing probabilities proportional to sample sizes.
+of exponential distributions with mixing probabilities proportional to expected event counts.
 
 Mathematical formulation:
 \deqn{S(t) = \sum_{j=1}^{k} p_j \exp(-\lambda_j t)}
-where \eqn{p_j = n_j / \sum n_j} is the mixing probability for subgroup j,
+where \eqn{p_j = E_j / \sum E_j} is the mixing probability for subgroup j based on expected events,
 \eqn{\lambda_j = \ln(2) / MST_j} is the hazard rate for subgroup j, and
 \eqn{MST_j} is the median survival time for subgroup j.
 
@@ -39,17 +39,17 @@ The overall median survival time is found by solving:
 \deqn{S(t_{median}) = 0.5}
 }
 \examples{
-# Example 1: Two subgroups
-sample_sizes <- c(100, 150)
+# Example 1: Two subgroups with different expected event counts
+expected_events <- c(75, 120)  # Expected events, not sample sizes
 MST_subgroups <- c(6, 7.5)
-result <- mstfromExpdists(sample_sizes, MST_subgroups)
+result <- mstfromExpdists(expected_events, MST_subgroups)
 print(result$subgroup_summary)
 print(paste("Overall MST:", round(result$MST_overall, 2), "months"))
 
 # Example 2: Three subgroups
-sample_sizes <- c(200, 300, 100)
+expected_events <- c(150, 180, 60)  # Based on expected event rates
 MST_subgroups <- c(8, 12, 15)
-result <- mstfromExpdists(sample_sizes, MST_subgroups)
+result <- mstfromExpdists(expected_events, MST_subgroups)
 print(result$subgroup_summary)
 print(paste("Overall MST:", round(result$MST_overall, 2), "months"))
 

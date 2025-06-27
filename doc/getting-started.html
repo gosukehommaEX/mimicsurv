@@ -390,6 +390,149 @@ person-time)</li>
 </ul>
 </div>
 </div>
+<div id="mixed-exponential-distributions" class="section level2">
+<h2>Mixed Exponential Distributions</h2>
+<div id="calculating-overall-median-survival-time-from-multiple-subgroups" class="section level3">
+<h3>Calculating Overall Median Survival Time from Multiple
+Subgroups</h3>
+<p>The <code>mstfromExpdists()</code> function calculates the overall
+median survival time for a mixed population composed of multiple
+subgroups, each following exponential distributions:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Example: Two biomarker subgroups with known expected events</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># In practice, these would come from published studies or trial design</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>expected_events <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">75</span>, <span class="dv">120</span>)  <span class="co"># Expected events from each subgroup</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>MST_subgroups <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="fl">7.5</span>)     <span class="co"># Median survival times from each subgroup</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Expected events:&quot;</span>, <span class="fu">paste</span>(expected_events, <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>)))</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Expected events: 75, 120&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co"># Use expected events for mixing probabilities</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>result_mixed <span class="ot">&lt;-</span> <span class="fu">mstfromExpdists</span>(expected_events, MST_subgroups)</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># View subgroup summary</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="fu">print</span>(result_mixed<span class="sc">$</span>subgroup_summary)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;   subgroup expected_events MST</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; 1        1              75 6.0</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; 2        2             120 7.5</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co"># View overall median survival time</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Overall MST:&quot;</span>, <span class="fu">round</span>(result_mixed<span class="sc">$</span>MST_overall, <span class="dv">2</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; Overall MST: 6.87 months</span></span></code></pre></div>
+</div>
+<div id="understanding-mixed-exponential-distributions" class="section level3">
+<h3>Understanding Mixed Exponential Distributions</h3>
+<p>When analyzing survival data from multiple subgroups that each follow
+exponential distributions, the overall population follows a
+<strong>mixture of exponential distributions</strong>.</p>
+<div id="mathematical-foundation" class="section level4">
+<h4>Mathematical Foundation</h4>
+<p>For a population composed of <span class="math inline">\(k\)</span>
+subgroups, the overall survival function is:</p>
+<p><span class="math display">\[S(t) = \sum_{j=1}^{k} p_j
+\exp(-\lambda_j t)\]</span></p>
+<p>where: - <span class="math inline">\(p_j = \frac{E_j}{\sum_{i=1}^{k}
+E_i}\)</span> is the mixing probability for subgroup <span class="math inline">\(j\)</span> based on expected events - <span class="math inline">\(\lambda_j = \frac{\ln(2)}{\text{MST}_j}\)</span>
+is the hazard rate for subgroup <span class="math inline">\(j\)</span> -
+<span class="math inline">\(E_j\)</span> is the expected number of
+events in subgroup <span class="math inline">\(j\)</span> - <span class="math inline">\(\text{MST}_j\)</span> is the median survival time
+for subgroup <span class="math inline">\(j\)</span></p>
+</div>
+<div id="expected-events-calculation" class="section level4">
+<h4>Expected Events Calculation</h4>
+<p>The expected number of events for each subgroup can be calculated
+from sample sizes and median survival times as: <span class="math inline">\(E_j = n_j \times [1 - \exp(-\lambda_j \times
+t_{\text{follow-up}})]\)</span></p>
+<p>where <span class="math inline">\(n_j\)</span> is the sample size and
+<span class="math inline">\(t_{\text{follow-up}}\)</span> is the
+follow-up time.</p>
+<p><strong>However, when working with published data, it is preferable
+to use the actual reported number of events</strong> rather than
+calculating expected events, as this provides more accurate
+information.</p>
+</div>
+<div id="median-survival-time-calculation" class="section level4">
+<h4>Median Survival Time Calculation</h4>
+<p>The overall median survival time is found by solving: <span class="math display">\[S(t_{median}) = 0.5\]</span></p>
+<p>This requires numerical methods since the equation: <span class="math display">\[\sum_{j=1}^{k} p_j \exp(-\lambda_j t_{median}) =
+0.5\]</span></p>
+<p>cannot be solved analytically for <span class="math inline">\(t_{median}\)</span> when <span class="math inline">\(k &gt; 1\)</span>.</p>
+</div>
+</div>
+<div id="three-subgroup-example" class="section level3">
+<h3>Three Subgroup Example</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Example: Three treatment subgroups with known expected events</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>expected_events_3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">150</span>, <span class="dv">180</span>, <span class="dv">60</span>)  <span class="co"># Expected events from published data</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>MST_subgroups_3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">12</span>, <span class="dv">15</span>)       <span class="co"># Median survival times from each subgroup</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>result_3groups <span class="ot">&lt;-</span> <span class="fu">mstfromExpdists</span>(expected_events_3, MST_subgroups_3)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co"># View results</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="fu">print</span>(result_3groups<span class="sc">$</span>subgroup_summary)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;   subgroup expected_events MST</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 1        1             150   8</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; 2        2             180  12</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 3        3              60  15</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Overall MST:&quot;</span>, <span class="fu">round</span>(result_3groups<span class="sc">$</span>MST_overall, <span class="dv">2</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; Overall MST: 10.54 months</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co"># Compare with simple weighted average (incorrect method)</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co"># For comparison: if we incorrectly used sample sizes</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>sample_sizes_3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">200</span>, <span class="dv">300</span>, <span class="dv">100</span>)  <span class="co"># Hypothetical sample sizes</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>weighted_avg <span class="ot">&lt;-</span> <span class="fu">sum</span>(sample_sizes_3 <span class="sc">*</span> MST_subgroups_3) <span class="sc">/</span> <span class="fu">sum</span>(sample_sizes_3)</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Simple weighted average:&quot;</span>, <span class="fu">round</span>(weighted_avg, <span class="dv">2</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; Simple weighted average: 11.17 months</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Difference:&quot;</span>, <span class="fu">round</span>(<span class="fu">abs</span>(result_3groups<span class="sc">$</span>MST_overall <span class="sc">-</span> weighted_avg), <span class="dv">2</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; Difference: 0.63 months</span></span></code></pre></div>
+</div>
+<div id="working-with-published-data" class="section level3">
+<h3>Working with Published Data</h3>
+<p>For convenience when working with published data that only provides
+sample sizes, you can calculate expected events:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># When only sample sizes are available from published studies</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>sample_sizes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">150</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>MST_subgroups <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="fl">7.5</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>follow_up_time <span class="ot">&lt;-</span> <span class="dv">24</span>  <span class="co"># months</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co"># Calculate expected events using exponential distribution formula</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> <span class="fu">log</span>(<span class="dv">2</span>) <span class="sc">/</span> MST_subgroups</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>expected_events <span class="ot">&lt;-</span> sample_sizes <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>lambda <span class="sc">*</span> follow_up_time))</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>result_from_samples <span class="ot">&lt;-</span> <span class="fu">mstfromExpdists</span>(expected_events, MST_subgroups)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="at">subgroup =</span> result_from_samples<span class="sc">$</span>subgroup_summary<span class="sc">$</span>subgroup,</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  <span class="at">sample_size =</span> sample_sizes,</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  <span class="at">expected_events =</span> <span class="fu">round</span>(expected_events, <span class="dv">1</span>),</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="at">MST =</span> MST_subgroups</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>))</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;   subgroup sample_size expected_events MST</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; 1        1         100            93.8 6.0</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; 2        2         150           133.7 7.5</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Overall MST (from sample sizes):&quot;</span>, <span class="fu">round</span>(result_from_samples<span class="sc">$</span>MST_overall, <span class="dv">2</span>), <span class="st">&quot;months</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt; Overall MST (from sample sizes): 6.83 months</span></span></code></pre></div>
+</div>
+<div id="why-expected-events-based-mixing-is-correct" class="section level3">
+<h3>Why Expected Events-Based Mixing is Correct</h3>
+<p>The median is a <strong>non-linear statistic</strong>, and for
+mixture distributions:</p>
+<p><span class="math display">\[\text{Median}(aX + bY) \neq a \cdot
+\text{Median}(X) + b \cdot \text{Median}(Y)\]</span></p>
+<p>More importantly, mixing probabilities should reflect the
+<strong>information content</strong> (expected events) rather than just
+sample sizes, because:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Information weighting</strong>: Groups with longer survival
+contribute less information per patient</li>
+<li><strong>Follow-up considerations</strong>: Different follow-up times
+affect the number of observed events</li>
+<li><strong>Censoring patterns</strong>: Differential censoring affects
+the actual information available</li>
+</ol>
+<p>The correct approach requires solving the survival equation
+numerically using event-based mixing probabilities, as implemented in
+<code>mstfromExpdists()</code>.</p>
+</div>
+</div>
 <div id="mathematical-background" class="section level2">
 <h2>Mathematical Background</h2>
 <p>The <code>mimicsurv</code> package implements the person-years method
@@ -459,280 +602,304 @@ t}{2}\)</span> (due to uniform distribution assumption)</li>
 <p>Under the uniform distribution assumption, if <span class="math inline">\(U \sim \text{Uniform}(0, \Delta t)\)</span>
 represents the time from interval start to event/censoring, then: <span class="math display">\[E[U] = \frac{0 + \Delta t}{2} = \frac{\Delta
 t}{2}\]</span></p>
-<p>We multiply by <span class="math inline">\(\frac{\Delta
-t}{2}\)</span> rather than a fraction.</p>
+<p>This is why we multiply by <span class="math inline">\(\frac{\Delta
+t}{2}\)</span> rather than some other fraction.</p>
 </div>
 <div id="trapezoidal-rule-implementation" class="section level4">
 <h4>Trapezoidal Rule Implementation</h4>
-<p>Combining these components yields the trapezoidal rule: <span class="math display">\[\text{Person-time}_i = n_{\text{risk}, i+1}
+<p>Combining both contributions: <span class="math display">\[\text{Person-time}_i = n_{\text{risk}, i+1}
 \times \Delta t + (n_{\text{risk}, i} - n_{\text{risk}, i+1}) \times
 \frac{\Delta t}{2}\]</span></p>
 <p>Simplifying: <span class="math display">\[\text{Person-time}_i =
-\frac{n_{\text{risk}, i} + n_{\text{risk}, i+1}}{2} \times \Delta
-t\]</span></p>
+\frac{(n_{\text{risk}, i} + n_{\text{risk}, i+1}) \times \Delta
+t}{2}\]</span></p>
+<p>This is the <strong>trapezoidal rule</strong> for numerical
+integration.</p>
 </div>
 </div>
 <div id="hazard-rate-estimation" class="section level3">
 <h3>Hazard Rate Estimation</h3>
-<p>Hazard rates are estimated as: <span class="math display">\[\lambda_i
-= \frac{\text{Number of events}_i}{\text{Person-time}_i}\]</span></p>
+<p>Once person-time is calculated, the hazard rate for interval <span class="math inline">\(i\)</span> is estimated as: <span class="math display">\[\hat{\lambda}_i = \frac{n_{\text{events},
+i}}{\text{Person-time}_i}\]</span></p>
 </div>
-<div id="median-survival-time" class="section level3">
-<h3>Median Survival Time</h3>
-<p>For piecewise exponential survival, the median is found where: <span class="math display">\[S(t) = \exp\left(-\sum_{j=1}^{k} \lambda_j \Delta
-t_j\right) = 0.5\]</span></p>
+<div id="event-calculation" class="section level3">
+<h3>Event Calculation</h3>
+<p>The number of events in interval <span class="math inline">\(i\)</span> is estimated as: <span class="math display">\[n_{\text{events}, i} = n_{\text{risk}, i} -
+n_{\text{risk}, i+1} - n_{\text{censored}, i}\]</span></p>
+<p>where <span class="math inline">\(n_{\text{censored}, i}\)</span> is
+the number of individuals censored during interval <span class="math inline">\(i\)</span>.</p>
+</div>
+<div id="median-survival-time-calculation-1" class="section level3">
+<h3>Median Survival Time Calculation</h3>
+<p>For piecewise exponential survival, the median is found by solving:
+<span class="math display">\[S(t_{\text{median}}) = 0.5\]</span></p>
+<p>where: <span class="math display">\[S(t) = \begin{cases}
+\exp\left(-\sum_{j=1}^{k} \lambda_j \Delta t_j\right) &amp; \text{if } t
+\text{ in interval } k+1 \\
+S(t_k) \exp(-\lambda_k (t - t_k)) &amp; \text{if } t \in [t_k, t_{k+1})
+\end{cases}\]</span></p>
 </div>
 </div>
-<div id="simulation-and-validation" class="section level2">
-<h2>Simulation and Validation</h2>
-<div id="generating-simulated-data" class="section level3">
-<h3>Generating Simulated Data</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Define piecewise exponential parameters</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>time_points <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">6</span>, <span class="dv">12</span>, <span class="dv">18</span>, <span class="dv">24</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>hazard_rates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co"># Simulate survival data with seed for reproducibility</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">simPE</span>(</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">n =</span> <span class="dv">100</span>,  <span class="co"># Reduced sample size for faster execution</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">time_points =</span> time_points,</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="at">hazard_rates =</span> hazard_rates,</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="at">max_time =</span> <span class="dv">24</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="at">censoring_prob =</span> <span class="fl">0.1</span>,  <span class="co"># Reduced censoring probability</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">123</span>  <span class="co"># For reproducible results</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>)</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co"># Check event rate</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Event status distribution:&quot;</span>)</span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Event status distribution:&quot;</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="fu">table</span>(sim_data<span class="sc">$</span>status)</span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;  0  1 </span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  4 96</span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co"># View first few rows</span></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;First 10 observations:&quot;</span>)</span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; [1] &quot;First 10 observations:&quot;</span></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="fu">head</span>(sim_data, <span class="dv">10</span>)</span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt;         time status</span></span>
-<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; 1  15.885523      1</span></span>
-<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; 2   4.757401      1</span></span>
-<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; 3  12.950805      1</span></span>
-<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; 4   2.488207      1</span></span>
-<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt; 5   1.227568      1</span></span>
-<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; 6  24.000000      1</span></span>
-<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; 7  10.230740      1</span></span>
-<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt; 8   2.276390      1</span></span>
-<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt; 9   9.690391      1</span></span>
-<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="co">#&gt; 10 12.032627      1</span></span></code></pre></div>
+<div id="simulation-studies" class="section level2">
+<h2>Simulation Studies</h2>
+<div id="data-generation" class="section level3">
+<h3>Data Generation</h3>
+<p>The <code>simPE()</code> function generates survival data from
+piecewise exponential distributions:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Define true parameters</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>true_time_points <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">6</span>, <span class="dv">12</span>, <span class="dv">18</span>, <span class="dv">24</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>true_hazard_rates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co"># Generate simulated data</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">simPE</span>(</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">n =</span> <span class="dv">100</span>,  <span class="co"># Reduced sample size for faster execution</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="at">time_points =</span> true_time_points,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="at">hazard_rates =</span> true_hazard_rates,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  <span class="at">max_time =</span> <span class="dv">24</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="at">censoring_prob =</span> <span class="fl">0.1</span>,  <span class="co"># Reduced censoring probability</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">123</span>  <span class="co"># For reproducible results</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>)</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co"># Check event rate</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Event status distribution:&quot;</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Event status distribution:&quot;</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="fu">table</span>(sim_data<span class="sc">$</span>status)</span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt;  0  1 </span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt;  4 96</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co"># View first few rows</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;First 10 observations:&quot;</span>)</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; [1] &quot;First 10 observations:&quot;</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="fu">head</span>(sim_data, <span class="dv">10</span>)</span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt;         time status</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt; 1  15.885523      1</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt; 2   4.757401      1</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt; 3  12.950805      1</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt; 4   2.488207      1</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt; 5   1.227568      1</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co">#&gt; 6  24.000000      1</span></span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co">#&gt; 7  10.230740      1</span></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a><span class="co">#&gt; 8   2.276390      1</span></span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="co">#&gt; 9   9.690391      1</span></span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co">#&gt; 10 12.032627      1</span></span></code></pre></div>
 </div>
 <div id="creating-summary-tables" class="section level3">
 <h3>Creating Summary Tables</h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Create Kaplan-Meier style summary</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>km_summary <span class="ot">&lt;-</span> <span class="fu">summaryKM</span>(sim_data, time_points)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Number at risk at each time point:&quot;</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Number at risk at each time point:&quot;</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">print</span>(km_summary<span class="sc">$</span>n_risk)</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; [1] 100  71  49  20   5</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Cumulative censoring at each time point:&quot;</span>)</span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Cumulative censoring at each time point:&quot;</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">print</span>(km_summary<span class="sc">$</span>n_censored_cumulative)</span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; [1] 0 2 2 4 4</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co"># Create comparison table</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>comparison_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>  <span class="at">Time =</span> time_points,</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>  <span class="at">N_Risk =</span> km_summary<span class="sc">$</span>n_risk,</span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>  <span class="at">N_Censored_Cumulative =</span> km_summary<span class="sc">$</span>n_censored_cumulative</span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>)</span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Summary table:&quot;</span>)</span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Summary table:&quot;</span></span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="fu">print</span>(comparison_table)</span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt;   Time N_Risk N_Censored_Cumulative</span></span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; 1    0    100                     0</span></span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; 2    6     71                     2</span></span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; 3   12     49                     2</span></span>
-<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; 4   18     20                     4</span></span>
-<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; 5   24      5                     4</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Create Kaplan-Meier style summary</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>km_summary <span class="ot">&lt;-</span> <span class="fu">summaryKM</span>(sim_data, true_time_points)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Number at risk at each time point:&quot;</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Number at risk at each time point:&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="fu">print</span>(km_summary<span class="sc">$</span>n_risk)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; [1] 100  71  49  20   5</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Cumulative censoring at each time point:&quot;</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Cumulative censoring at each time point:&quot;</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="fu">print</span>(km_summary<span class="sc">$</span>n_censored_cumulative)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; [1] 0 2 2 4 4</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co"># Create comparison table</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>comparison_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  <span class="at">Time =</span> true_time_points,</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  <span class="at">True_n_risk =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">75</span>, <span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">10</span>),  <span class="co"># Hypothetical true values</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>  <span class="at">Simulated_n_risk =</span> km_summary<span class="sc">$</span>n_risk,</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>  <span class="at">Difference =</span> km_summary<span class="sc">$</span>n_risk <span class="sc">-</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">75</span>, <span class="dv">50</span>, <span class="dv">25</span>, <span class="dv">10</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>)</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Comparison of simulated vs. expected values:&quot;</span>)</span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Comparison of simulated vs. expected values:&quot;</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="fu">print</span>(comparison_table)</span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt;   Time True_n_risk Simulated_n_risk Difference</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; 1    0         100              100          0</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; 2    6          75               71         -4</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; 3   12          50               49         -1</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; 4   18          25               20         -5</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt; 5   24          10                5         -5</span></span></code></pre></div>
 </div>
-<div id="method-validation-example" class="section level3">
-<h3>Method Validation Example</h3>
-<p>Here’s a practical example showing how well our method recovers known
-parameters:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Set known &quot;true&quot; parameters similar to our study</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>true_times <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">6</span>, <span class="dv">12</span>, <span class="dv">18</span>, <span class="dv">24</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>true_hazards <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># Generate larger sample for more stable estimates</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>large_sim_data <span class="ot">&lt;-</span> <span class="fu">simPE</span>(</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">n =</span> <span class="dv">1000</span>,  <span class="co"># Larger sample for better precision</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="at">time_points =</span> true_times,</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="at">hazard_rates =</span> true_hazards,</span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="at">max_time =</span> <span class="dv">24</span>,</span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="at">censoring_prob =</span> <span class="fl">0.15</span>,</span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">2024</span>  <span class="co"># For reproducible results</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>)</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co"># Create KM table from simulated data</span></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>large_km_table <span class="ot">&lt;-</span> <span class="fu">summaryKM</span>(large_sim_data, true_times)</span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Large simulation summary:&quot;</span>)</span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Large simulation summary:&quot;</span></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">data.frame</span>(</span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  <span class="at">Time =</span> true_times,</span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>  <span class="at">N_Risk =</span> large_km_table<span class="sc">$</span>n_risk,</span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  <span class="at">N_Censored =</span> large_km_table<span class="sc">$</span>n_censored_cumulative</span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>))</span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt;   Time N_Risk N_Censored</span></span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; 1    0   1000          0</span></span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; 2    6    705         34</span></span>
-<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; 3   12    397         54</span></span>
-<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; 4   18    183         67</span></span>
-<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt; 5   24     80         69</span></span>
-<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a></span>
-<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co"># Estimate parameters from the KM table</span></span>
-<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>estimated_result <span class="ot">&lt;-</span> <span class="fu">extractfromKM</span>(</span>
-<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>  <span class="at">time_points =</span> true_times,</span>
-<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>  <span class="at">n_risk =</span> large_km_table<span class="sc">$</span>n_risk,</span>
-<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>  <span class="at">n_censored =</span> large_km_table<span class="sc">$</span>n_censored_cumulative</span>
-<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>)</span>
-<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a></span>
-<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Estimated hazard table:&quot;</span>)</span>
-<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Estimated hazard table:&quot;</span></span>
-<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="fu">print</span>(estimated_result<span class="sc">$</span>hazard_table)</span>
-<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="co">#&gt;   interval n_at_risk_start n_censored_interval n_events hazard_rate</span></span>
-<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="co">#&gt; 1    [0,6)            1000                  34      261  0.05102639</span></span>
-<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="co">#&gt; 2   [6,12)             705                  20      288  0.08711434</span></span>
-<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a><span class="co">#&gt; 3  [12,18)             397                  13      201  0.11551724</span></span>
-<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a><span class="co">#&gt; 4  [18,24)             183                   2      101  0.12801014</span></span>
-<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a></span>
-<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Estimated median survival:&quot;</span>, <span class="fu">round</span>(estimated_result<span class="sc">$</span>median_survival, <span class="dv">2</span>), <span class="st">&quot;months&quot;</span>))</span>
-<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Estimated median survival: 10.44 months&quot;</span></span>
-<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a></span>
-<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a><span class="co"># Validate the method by comparing with original parameters</span></span>
-<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a>hazard_comparison <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a>  <span class="at">Interval =</span> estimated_result<span class="sc">$</span>hazard_table<span class="sc">$</span>interval,</span>
-<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a>  <span class="at">True_Hazard =</span> true_hazards,</span>
-<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a>  <span class="at">Estimated_Hazard =</span> estimated_result<span class="sc">$</span>hazard_table<span class="sc">$</span>hazard_rate,</span>
-<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a>  <span class="at">Relative_Error =</span> <span class="fu">abs</span>(estimated_result<span class="sc">$</span>hazard_table<span class="sc">$</span>hazard_rate <span class="sc">-</span> true_hazards) <span class="sc">/</span> </span>
-<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a>                   true_hazards <span class="sc">*</span> <span class="dv">100</span></span>
-<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a>)</span>
-<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a></span>
-<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Hazard rate comparison:&quot;</span>)</span>
-<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Hazard rate comparison:&quot;</span></span>
-<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a><span class="fu">print</span>(hazard_comparison)</span>
-<span id="cb5-63"><a href="#cb5-63" tabindex="-1"></a><span class="co">#&gt;   Interval True_Hazard Estimated_Hazard Relative_Error</span></span>
-<span id="cb5-64"><a href="#cb5-64" tabindex="-1"></a><span class="co">#&gt; 1    [0,6)        0.05       0.05102639       2.052786</span></span>
-<span id="cb5-65"><a href="#cb5-65" tabindex="-1"></a><span class="co">#&gt; 2   [6,12)        0.08       0.08711434       8.892922</span></span>
-<span id="cb5-66"><a href="#cb5-66" tabindex="-1"></a><span class="co">#&gt; 3  [12,18)        0.12       0.11551724       3.735632</span></span>
-<span id="cb5-67"><a href="#cb5-67" tabindex="-1"></a><span class="co">#&gt; 4  [18,24)        0.15       0.12801014      14.659907</span></span>
-<span id="cb5-68"><a href="#cb5-68" tabindex="-1"></a></span>
-<span id="cb5-69"><a href="#cb5-69" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;The method successfully recovers the true hazard rates with relative errors of 2-11%,</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb5-70"><a href="#cb5-70" tabindex="-1"></a><span class="co">#&gt; The method successfully recovers the true hazard rates with relative errors of 2-11%,</span></span>
-<span id="cb5-71"><a href="#cb5-71" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;demonstrating good accuracy for practical applications.</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb5-72"><a href="#cb5-72" tabindex="-1"></a><span class="co">#&gt; demonstrating good accuracy for practical applications.</span></span></code></pre></div>
-</div>
-<div id="reproducibility-demonstration" class="section level3">
-<h3>Reproducibility Demonstration</h3>
-<p>One key feature of the updated <code>simPE()</code> function is the
-ability to generate reproducible results:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Test reproducibility with same seed</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="cn">NULL</span>)  <span class="co"># Clear any existing seed</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>sim1 <span class="ot">&lt;-</span> <span class="fu">simPE</span>(<span class="at">n =</span> <span class="dv">50</span>, time_points, hazard_rates, <span class="dv">24</span>, <span class="at">seed =</span> <span class="dv">456</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>sim2 <span class="ot">&lt;-</span> <span class="fu">simPE</span>(<span class="at">n =</span> <span class="dv">50</span>, time_points, hazard_rates, <span class="dv">24</span>, <span class="at">seed =</span> <span class="dv">456</span>)</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;First simulation (first 5 rows):&quot;</span>)</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; [1] &quot;First simulation (first 5 rows):&quot;</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(sim1, <span class="dv">5</span>))</span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;        time status</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; 1 24.000000      1</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; 2 18.388074      1</span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 3  6.133383      1</span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 4  3.200241      1</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; 5  4.755047      1</span></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Second simulation (first 5 rows):&quot;</span>)</span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Second simulation (first 5 rows):&quot;</span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(sim2, <span class="dv">5</span>))</span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt;        time status</span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; 1 24.000000      1</span></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; 2 18.388074      1</span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; 3  6.133383      1</span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt; 4  3.200241      1</span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; 5  4.755047      1</span></span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a></span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Are the simulations identical?&quot;</span>, <span class="fu">identical</span>(sim1, sim2)))</span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Are the simulations identical? TRUE&quot;</span></span>
-<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a></span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co"># Test different seeds produce different results</span></span>
-<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>sim3 <span class="ot">&lt;-</span> <span class="fu">simPE</span>(<span class="at">n =</span> <span class="dv">50</span>, time_points, hazard_rates, <span class="dv">24</span>, <span class="at">seed =</span> <span class="dv">789</span>)</span>
-<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Are sim1 and sim3 different?&quot;</span>, <span class="sc">!</span><span class="fu">identical</span>(sim1, sim3)))</span>
-<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Are sim1 and sim3 different? TRUE&quot;</span></span></code></pre></div>
-</div>
-</div>
-<div id="validation-study" class="section level2">
-<h2>Validation Study</h2>
-<div id="comprehensive-validation" class="section level3">
-<h3>Comprehensive Validation</h3>
-<p>The <code>validate_mimicsurv()</code> function provides comprehensive
-validation of the hazard estimation methods:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Run validation study (small example for demonstration)</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co"># Note: This is computationally intensive, so we set eval=FALSE for the vignette</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>validation_result <span class="ot">&lt;-</span> <span class="fu">validate_mimicsurv</span>(</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">true_time_points =</span> time_points,</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">true_hazard_rates =</span> hazard_rates,</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">sample_sizes =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>),</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="at">n_simulations =</span> <span class="dv">50</span>,</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="at">censoring_prob =</span> <span class="fl">0.15</span>,</span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1001</span>  <span class="co"># For reproducible validation</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>)</span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co"># View summary statistics</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="fu">print</span>(validation_result<span class="sc">$</span>summary_statistics)</span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co"># View detailed results for one sample size</span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="fu">print</span>(validation_result<span class="sc">$</span>detailed_results<span class="sc">$</span>n_200<span class="sc">$</span>hazard_results)</span></code></pre></div>
-</div>
-</div>
-<div id="practical-applications" class="section level2">
-<h2>Practical Applications</h2>
-<div id="working-with-published-data" class="section level3">
-<h3>Working with Published Data</h3>
-<p>When working with published Kaplan-Meier tables, follow these
-steps:</p>
-<ol style="list-style-type: decimal">
-<li><strong>Extract time points</strong> from the published figure or
-table</li>
-<li><strong>Read number at risk</strong> at each time point</li>
-<li><strong>Calculate cumulative censoring</strong> if not directly
-provided</li>
-<li><strong>Apply <code>extractfromKM()</code></strong> to estimate
-hazard rates</li>
-</ol>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Example with realistic published data</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>published_times <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>, <span class="dv">15</span>, <span class="dv">18</span>, <span class="dv">21</span>, <span class="dv">24</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>published_n_risk <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">180</span>, <span class="dv">165</span>, <span class="dv">145</span>, <span class="dv">128</span>, <span class="dv">110</span>, <span class="dv">95</span>, <span class="dv">78</span>, <span class="dv">65</span>, <span class="dv">50</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>published_censored <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">22</span>, <span class="dv">35</span>, <span class="dv">48</span>, <span class="dv">62</span>, <span class="dv">75</span>, <span class="dv">90</span>)</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># Apply our method</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>published_result <span class="ot">&lt;-</span> <span class="fu">extractfromKM</span>(published_times, published_n_risk, published_censored)</span>
+<div id="reproducibility" class="section level3">
+<h3>Reproducibility</h3>
+<p>The simulation functions support seed specification for reproducible
+results:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Demonstrate reproducibility with seeds</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>sim1 <span class="ot">&lt;-</span> <span class="fu">simPE</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">time_points =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">12</span>, <span class="dv">24</span>), </span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>              <span class="at">hazard_rates =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>), <span class="at">max_time =</span> <span class="dv">24</span>, <span class="at">seed =</span> <span class="dv">456</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>sim2 <span class="ot">&lt;-</span> <span class="fu">simPE</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">time_points =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">12</span>, <span class="dv">24</span>), </span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>              <span class="at">hazard_rates =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>), <span class="at">max_time =</span> <span class="dv">24</span>, <span class="at">seed =</span> <span class="dv">456</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>sim3 <span class="ot">&lt;-</span> <span class="fu">simPE</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">time_points =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">12</span>, <span class="dv">24</span>), </span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>              <span class="at">hazard_rates =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.2</span>), <span class="at">max_time =</span> <span class="dv">24</span>, <span class="at">seed =</span> <span class="dv">789</span>)</span>
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Analysis of published data:&quot;</span>)</span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Analysis of published data:&quot;</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="fu">print</span>(published_result<span class="sc">$</span>hazard_table)</span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;   interval n_at_risk_start n_censored_interval n_events hazard_rate</span></span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; 1    [0,3)             180                   5       10 0.019323671</span></span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; 2    [3,6)             165                  10       10 0.021505376</span></span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; 3    [6,9)             145                   7       10 0.024420024</span></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; 4   [9,12)             128                  13        5 0.014005602</span></span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; 5  [12,15)             110                  13        2 0.006504065</span></span>
-<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#&gt; 6  [15,18)              95                  14        3 0.011560694</span></span>
-<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt; 7  [18,21)              78                  13        0 0.000000000</span></span>
-<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co">#&gt; 8  [21,24)              65                  15        0 0.000000000</span></span>
-<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Median survival:&quot;</span>, <span class="fu">round</span>(published_result<span class="sc">$</span>median_survival, <span class="dv">2</span>), <span class="st">&quot;months&quot;</span>))</span>
-<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Median survival: NA months&quot;</span></span></code></pre></div>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;First simulation (first 5 rows):&quot;</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;First simulation (first 5 rows):&quot;</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(sim1, <span class="dv">5</span>))</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;        time status</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; 1 18.064701      1</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; 2 13.791056      1</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; 3  3.106706      1</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; 4  1.600120      1</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; 5  2.377524      1</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Second simulation (first 5 rows):&quot;</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Second simulation (first 5 rows):&quot;</span></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(sim2, <span class="dv">5</span>))</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt;        time status</span></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co">#&gt; 1 18.064701      1</span></span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt; 2 13.791056      1</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt; 3  3.106706      1</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt; 4  1.600120      1</span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="co">#&gt; 5  2.377524      1</span></span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Are the simulations identical?&quot;</span>, <span class="fu">identical</span>(sim1, sim2)))</span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Are the simulations identical? TRUE&quot;</span></span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Are sim1 and sim3 different?&quot;</span>, <span class="sc">!</span><span class="fu">identical</span>(sim1, sim3)))</span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Are sim1 and sim3 different? TRUE&quot;</span></span></code></pre></div>
+</div>
+</div>
+<div id="method-comparison" class="section level2">
+<h2>Method Comparison</h2>
+<div id="simulated-vs.-published-data" class="section level3">
+<h3>Simulated vs. Published Data</h3>
+<p>We can compare our method performance on both simulated and published
+data:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Apply our method to simulated data</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>sim_result <span class="ot">&lt;-</span> <span class="fu">extractfromKM</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">time_points =</span> true_time_points,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">n_risk =</span> km_summary<span class="sc">$</span>n_risk,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">n_censored =</span> km_summary<span class="sc">$</span>n_censored_cumulative</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Analysis of simulated data:&quot;</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Analysis of simulated data:&quot;</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="fu">print</span>(sim_result<span class="sc">$</span>hazard_table)</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt;   interval n_at_risk_start n_censored_interval n_events hazard_rate</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; 1    [0,6)             100                   2       27  0.05263158</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; 2   [6,12)              71                   0       22  0.06111111</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; 3  [12,18)              49                   2       27  0.13043478</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; 4  [18,24)              20                   0       15  0.20000000</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co"># Compare estimated vs. true hazard rates</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>comparison_hazards <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>  <span class="at">Interval =</span> sim_result<span class="sc">$</span>hazard_table<span class="sc">$</span>interval,</span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>  <span class="at">True_Hazard =</span> true_hazard_rates,</span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>  <span class="at">Estimated_Hazard =</span> sim_result<span class="sc">$</span>hazard_table<span class="sc">$</span>hazard_rate,</span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>  <span class="at">Relative_Error =</span> <span class="fu">abs</span>(sim_result<span class="sc">$</span>hazard_table<span class="sc">$</span>hazard_rate <span class="sc">-</span> true_hazard_rates) <span class="sc">/</span> true_hazard_rates <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a>)</span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Hazard rate comparison:&quot;</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Hazard rate comparison:&quot;</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="fu">print</span>(comparison_hazards)</span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt;   Interval True_Hazard Estimated_Hazard Relative_Error</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; 1    [0,6)        0.05       0.05263158       5.263158</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt; 2   [6,12)        0.08       0.06111111      23.611111</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; 3  [12,18)        0.12       0.13043478       8.695652</span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; 4  [18,24)        0.15       0.20000000      33.333333</span></span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a></span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="co"># Calculate true median survival time</span></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a>true_median <span class="ot">&lt;-</span> <span class="fu">getMediansurv</span>(true_time_points, true_hazard_rates)</span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;True median survival:&quot;</span>, <span class="fu">round</span>(true_median, <span class="dv">2</span>), <span class="st">&quot;months&quot;</span>))</span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="co">#&gt; [1] &quot;True median survival: 10.91 months&quot;</span></span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Estimated median survival:&quot;</span>, <span class="fu">round</span>(sim_result<span class="sc">$</span>median_survival, <span class="dv">2</span>), <span class="st">&quot;months&quot;</span>))</span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Estimated median survival: 12.08 months&quot;</span></span></code></pre></div>
+</div>
+<div id="analysis-of-published-data" class="section level3">
+<h3>Analysis of Published Data</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Compare our method with published Kaplan-Meier data</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>published_times <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>, <span class="dv">15</span>, <span class="dv">18</span>, <span class="dv">21</span>, <span class="dv">24</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>published_n_risk <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">180</span>, <span class="dv">165</span>, <span class="dv">145</span>, <span class="dv">128</span>, <span class="dv">110</span>, <span class="dv">95</span>, <span class="dv">78</span>, <span class="dv">65</span>, <span class="dv">50</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>published_censored <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">22</span>, <span class="dv">35</span>, <span class="dv">48</span>, <span class="dv">62</span>, <span class="dv">75</span>, <span class="dv">90</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co"># Apply our method</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>published_result <span class="ot">&lt;-</span> <span class="fu">extractfromKM</span>(published_times, published_n_risk, published_censored)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Analysis of published data:&quot;</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Analysis of published data:&quot;</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="fu">print</span>(published_result<span class="sc">$</span>hazard_table)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;   interval n_at_risk_start n_censored_interval n_events hazard_rate</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; 1    [0,3)             180                   5       10 0.019323671</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; 2    [3,6)             165                  10       10 0.021505376</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; 3    [6,9)             145                   7       10 0.024420024</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; 4   [9,12)             128                  13        5 0.014005602</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; 5  [12,15)             110                  13        2 0.006504065</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; 6  [15,18)              95                  14        3 0.011560694</span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; 7  [18,21)              78                  13        0 0.000000000</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="co">#&gt; 8  [21,24)              65                  15        0 0.000000000</span></span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Median survival:&quot;</span>, <span class="fu">round</span>(published_result<span class="sc">$</span>median_survival, <span class="dv">2</span>), <span class="st">&quot;months&quot;</span>))</span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Median survival: NA months&quot;</span></span></code></pre></div>
+</div>
+</div>
+<div id="performance-assessment" class="section level2">
+<h2>Performance Assessment</h2>
+<div id="computational-efficiency" class="section level3">
+<h3>Computational Efficiency</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Benchmark computational performance</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">system.time</span>({</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  result_timing <span class="ot">&lt;-</span> <span class="fu">extractfromKM</span>(time_points, n_risk, n_censored)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>})</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt;       0       0       0</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co"># Test with larger datasets</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>large_times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">60</span>, <span class="at">by =</span> <span class="dv">3</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>large_n_risk <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1000</span>, <span class="dv">100</span>, <span class="at">length.out =</span> <span class="fu">length</span>(large_times))</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>large_censored <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(<span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">rep</span>(<span class="dv">20</span>, <span class="fu">length</span>(large_times) <span class="sc">-</span> <span class="dv">1</span>)))</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Performance with larger dataset:&quot;</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Performance with larger dataset:&quot;</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="fu">system.time</span>({</span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a>  large_result <span class="ot">&lt;-</span> <span class="fu">extractfromKM</span>(large_times, large_n_risk, large_censored)</span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>})</span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt;       0       0       0</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Large dataset median survival:&quot;</span>)</span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Large dataset median survival:&quot;</span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="fu">round</span>(large_result<span class="sc">$</span>median_survival, <span class="dv">2</span>), <span class="st">&quot;months&quot;</span>))</span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; [1] &quot;47.51 months&quot;</span></span></code></pre></div>
+</div>
+</div>
+<div id="advanced-applications" class="section level2">
+<h2>Advanced Applications</h2>
+<div id="median-calculation-for-complex-scenarios" class="section level3">
+<h3>Median Calculation for Complex Scenarios</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Example with complex piecewise exponential parameters</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>complex_times <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">12</span>, <span class="dv">15</span>, <span class="dv">18</span>, <span class="dv">21</span>, <span class="dv">24</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>complex_hazards <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.02</span>, <span class="fl">0.05</span>, <span class="fl">0.08</span>, <span class="fl">0.12</span>, <span class="fl">0.15</span>, <span class="fl">0.18</span>, <span class="fl">0.22</span>, <span class="fl">0.25</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>complex_median <span class="ot">&lt;-</span> <span class="fu">getMediansurv</span>(complex_times, complex_hazards)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">&quot;Complex scenario median:&quot;</span>, <span class="fu">round</span>(complex_median, <span class="dv">2</span>), <span class="st">&quot;months&quot;</span>))</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Complex scenario median: 11.03 months&quot;</span></span></code></pre></div>
+</div>
+<div id="sensitivity-analysis" class="section level3">
+<h3>Sensitivity Analysis</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Sensitivity to censoring assumptions</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>censoring_levels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>median_estimates <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(censoring_levels))</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(censoring_levels)) {</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  sim_sens <span class="ot">&lt;-</span> <span class="fu">simPE</span>(<span class="at">n =</span> <span class="dv">200</span>, <span class="at">time_points =</span> true_time_points, </span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>                    <span class="at">hazard_rates =</span> true_hazard_rates, <span class="at">max_time =</span> <span class="dv">24</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>                    <span class="at">censoring_prob =</span> censoring_levels[i], <span class="at">seed =</span> <span class="dv">100</span> <span class="sc">+</span> i)</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  km_sens <span class="ot">&lt;-</span> <span class="fu">summaryKM</span>(sim_sens, true_time_points)</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  result_sens <span class="ot">&lt;-</span> <span class="fu">extractfromKM</span>(true_time_points, km_sens<span class="sc">$</span>n_risk, </span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>                               km_sens<span class="sc">$</span>n_censored_cumulative)</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>  median_estimates[i] <span class="ot">&lt;-</span> result_sens<span class="sc">$</span>median_survival</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>}</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>sensitivity_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>  <span class="at">Censoring =</span> <span class="fu">paste0</span>(censoring_levels <span class="sc">*</span> <span class="dv">100</span>, <span class="st">&quot;%&quot;</span>),</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>  <span class="at">Median_Estimate =</span> <span class="fu">round</span>(median_estimates, <span class="dv">2</span>),</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>  <span class="at">Bias =</span> <span class="fu">round</span>(median_estimates <span class="sc">-</span> true_median, <span class="dv">2</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a>)</span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;Sensitivity to censoring rate:&quot;</span>)</span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Sensitivity to censoring rate:&quot;</span></span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a><span class="fu">print</span>(sensitivity_table)</span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a><span class="co">#&gt;   Censoring Median_Estimate  Bias</span></span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a><span class="co">#&gt; 1        5%           10.25 -0.66</span></span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a><span class="co">#&gt; 2       10%           12.10  1.18</span></span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a><span class="co">#&gt; 3       15%           10.74 -0.17</span></span>
+<span id="cb13-28"><a href="#cb13-28" tabindex="-1"></a><span class="co">#&gt; 4       20%           11.98  1.06</span></span></code></pre></div>
 </div>
 </div>
 <div id="summary" class="section level2">
@@ -743,26 +910,47 @@ hazard rates</li>
 parameters from published data</li>
 <li><strong>Simulation capabilities</strong> for method validation and
 power analysis</li>
-<li><strong>Reproducible results</strong> through seed
-specification</li>
+<li><strong>Mixed exponential distribution analysis</strong> for
+combining multiple subgroups with event-based mixing</li>
+<li><strong>Reproducible results</strong> with seed specification</li>
 <li><strong>Mathematical foundation</strong> based on established
 epidemiological principles</li>
 </ul>
-<p>Key advantages:</p>
-<ol style="list-style-type: decimal">
+<div id="key-advantages" class="section level3">
+<h3>Key Advantages</h3>
+<ul>
 <li><strong>Non-parametric approach</strong>: No distributional
 assumptions beyond piecewise exponentiality</li>
 <li><strong>Computationally efficient</strong>: Fast estimation suitable
 for simulation studies</li>
 <li><strong>Theoretically grounded</strong>: Based on established
-person-years methodology</li>
+person-years methodology and event-based mixing</li>
 <li><strong>Practical utility</strong>: Applicable to real published
 survival data</li>
-</ol>
+</ul>
 <p>The method demonstrates excellent performance in recovering true
 hazard rates with relative errors typically under 15%, making it
 suitable for meta-analyses and comparative effectiveness research based
 on published survival curves.</p>
+</div>
+<div id="key-functions-summary" class="section level3">
+<h3>Key Functions Summary</h3>
+<ul>
+<li><code>extractfromKM()</code>: Extract survival analysis results from
+Kaplan-Meier tables</li>
+<li><code>mstfromExpdists()</code>: Calculate overall median survival
+time from mixed exponential distributions using event-based mixing</li>
+<li><code>simPE()</code>: Simulate survival data from piecewise
+exponential distributions</li>
+<li><code>summaryKM()</code>: Create Kaplan-Meier style summary tables
+from simulated data</li>
+<li><code>getMediansurv()</code>: Calculate median survival time from
+piecewise exponential parameters</li>
+</ul>
+<p>For real-world applications, see the <a href="../articles/keynote859-analysis.html">KEYNOTE-859 Analysis
+vignette</a> which demonstrates the complete workflow using actual
+clinical trial data.</p>
+</div>
 </div>
 
 
